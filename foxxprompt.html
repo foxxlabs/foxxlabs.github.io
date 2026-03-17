@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🦊 foxxprompt | Advanced CLI Prompt Architect</title>
+    <title>🦊 foxxprompt | AI Prompt Generator</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🦊</text></svg>">
     <style>
         :root {
             --bg-color: #0d1117;
@@ -13,7 +14,6 @@
             --accent-hover: #ff9f2e;
             --border-color: #3e2723;
             --input-bg: #0d1117;
-            --button-hover: #e67e22;
             --mono-font: 'Fira Code', 'Courier New', monospace;
         }
 
@@ -36,7 +36,7 @@
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 10px;
         }
 
         .main {
@@ -45,38 +45,36 @@
             flex-direction: column;
             padding: 20px;
             overflow-y: auto;
-            background-color: var(--bg-color);
         }
 
         h1 {
-            font-size: 1.6rem;
+            font-size: 1.5rem;
             color: var(--accent-color);
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             border-bottom: 2px solid var(--accent-color);
             padding-bottom: 10px;
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
             font-weight: 800;
         }
 
         h2 {
-            font-size: 0.8rem;
+            font-size: 0.7rem;
             text-transform: uppercase;
-            letter-spacing: 0.1rem;
+            letter-spacing: 0.08rem;
             color: #ffb74d;
-            margin-bottom: 12px;
-            margin-top: 15px;
+            margin-bottom: 6px;
             border-left: 3px solid var(--accent-color);
             padding-left: 8px;
         }
 
-        .field-group { margin-bottom: 12px; }
+        .field-group { margin-bottom: 8px; }
 
         label {
             display: block;
-            font-size: 0.85rem;
-            margin-bottom: 5px;
+            font-size: 0.75rem;
+            margin-bottom: 3px;
             font-weight: 600;
             color: #d1d5db;
         }
@@ -87,24 +85,53 @@
             border: 1px solid var(--border-color);
             border-radius: 6px;
             color: var(--text-color);
-            padding: 10px 12px;
-            font-size: 0.85rem;
+            padding: 8px 10px;
+            font-size: 0.75rem;
             font-family: var(--mono-font);
         }
 
-        textarea { resize: vertical; min-height: 60px; }
+        textarea { resize: vertical; min-height: 45px; }
 
-        input:focus, textarea:focus {
+        input:focus, textarea:focus, select:focus {
             outline: none;
             border-color: var(--accent-color);
             box-shadow: 0 0 0 3px rgba(255, 140, 0, 0.2);
         }
 
+        .type-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .type-btn {
+            background-color: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 10px 6px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+            color: var(--text-color);
+        }
+
+        .type-btn:hover { border-color: var(--accent-color); }
+
+        .type-btn.active {
+            background-color: #2c1e14;
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+        }
+
+        .type-btn .icon { font-size: 1.2rem; display: block; margin-bottom: 3px; }
+        .type-btn .label { font-size: 0.65rem; font-weight: 600; }
+
         .preview-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
         }
 
         #prompt-output {
@@ -112,10 +139,10 @@
             background-color: var(--sidebar-bg);
             border: 1px solid var(--border-color);
             border-radius: 8px;
-            padding: 24px;
+            padding: 18px;
             font-family: var(--mono-font);
-            font-size: 0.85rem;
-            line-height: 1.6;
+            font-size: 0.75rem;
+            line-height: 1.5;
             white-space: pre-wrap;
             overflow-y: auto;
             color: #e6edf3;
@@ -127,7 +154,7 @@
             border: none;
             border-radius: 6px;
             padding: 8px 16px;
-            font-size: 0.85rem;
+            font-size: 0.75rem;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s;
@@ -148,7 +175,7 @@
 
         .copy-success {
             color: #ffb74d;
-            font-size: 0.8rem;
+            font-size: 0.7rem;
             margin-right: 10px;
             opacity: 0;
             transition: opacity 0.3s;
@@ -156,7 +183,9 @@
 
         .copy-success.visible { opacity: 1; }
 
-        section { padding-bottom: 10px; border-bottom: 1px solid #2c1e14; }
+        section { padding-bottom: 6px; border-bottom: 1px solid #2c1e14; }
+
+        .hidden { display: none; }
     </style>
 </head>
 <body>
@@ -164,90 +193,83 @@
     <aside class="sidebar">
         <h1>🦊 foxxprompt</h1>
 
-        <section>
-            <h2>🎯 WHAT SHOULD THIS APP DO?</h2>
+        <div class="type-selector">
+            <div class="type-btn active" data-type="code" onclick="selectType('code')">
+                <span class="icon">💻</span>
+                <span class="label">Code</span>
+            </div>
+            <div class="type-btn" data-type="image" onclick="selectType('image')">
+                <span class="icon">🎨</span>
+                <span class="label">Image</span>
+            </div>
+            <div class="type-btn" data-type="writing" onclick="selectType('writing')">
+                <span class="icon">✍</span>
+                <span class="label">Writing</span>
+            </div>
+            <div class="type-btn" data-type="video" onclick="selectType('video')">
+                <span class="icon">🎬</span>
+                <span class="label">Video</span>
+            </div>
+        </div>
+
+        <section id="section-core">
+            <h2>🎯 Core Concept</h2>
             <div class="field-group">
-                <label for="app_purpose">Main purpose of this app</label>
-                <textarea id="app_purpose" placeholder="What does this app do? What problem does it solve?"></textarea>
+                <label for="main_idea">What do you want to create?</label>
+                <textarea id="main_idea" placeholder="Describe your idea in detail - what, why, and how it should work"></textarea>
             </div>
             <div class="field-group">
-                <label for="user_actions">What can users do?</label>
-                <textarea id="user_actions" placeholder="Create, read, update, delete? Search? Export? Submit forms?"></textarea>
-            </div>
-            <div class="field-group">
-                <label for="example_usage">Example: A user opens the app and...</label>
-                <textarea id="example_usage" placeholder="Step by step: User does X → sees Y → gets result Z"></textarea>
+                <label for="problem">Problem or Need</label>
+                <textarea id="problem" placeholder="What problem does this solve? Who is it for?"></textarea>
             </div>
         </section>
 
-        <section>
-            <h2>📋 PROJECT</h2>
-            <div class="field-group">
-                <label for="project_name">Project Name</label>
-                <input type="text" id="project_name" placeholder="My Awesome App">
+        <section id="section-details">
+            <h2 id="details-title">📋 Technical Details</h2>
+            <div class="field-group" id="field-style">
+                <label for="style">Tech Stack / Framework</label>
+                <input type="text" id="style" placeholder="e.g., React, Node.js, TypeScript, PostgreSQL">
             </div>
-            <div class="field-group">
-                <label for="project_type">Project Type</label>
-                <select id="project_type">
-                    <option value="">Select type...</option>
-                    <option value="new">New Project</option>
-                    <option value="feature">Add Feature</option>
-                    <option value="bugfix">Bug Fix</option>
-                    <option value="refactor">Refactor</option>
-                    <option value="api">API</option>
-                    <option value="cli">CLI Tool</option>
-                </select>
+            <div class="field-group" id="field-requirements">
+                <label for="requirements">Features & Functionality</label>
+                <textarea id="requirements" placeholder="Key features, user interactions, data handling"></textarea>
             </div>
-            <div class="field-group">
-                <label for="failure_state">Current Problem (if bug)</label>
-                <textarea id="failure_state" placeholder="Describe the error or incorrect behavior"></textarea>
+            <div class="field-group" id="field-audience">
+                <label for="audience">Target Audience</label>
+                <input type="text" id="audience" placeholder="Who will use this? What skill level?">
             </div>
         </section>
 
-        <section>
-            <h2>✨ FEATURES</h2>
-            <div class="field-group">
-                <label for="core_features">Must-have features</label>
-                <textarea id="core_features" placeholder="List essential features"></textarea>
+        <section id="section-context">
+            <h2>🔧 Implementation</h2>
+            <div class="field-group" id="field-context">
+                <label for="context">Existing Code / References</label>
+                <textarea id="context" placeholder="Files to modify, existing codebase patterns, libraries to use">
+</textarea>
             </div>
-            <div class="field-group">
-                <label for="nice_to_have">Nice-to-have (if time permits)</label>
-                <textarea id="nice_to_have" placeholder="Extra features that would be great"></textarea>
+            <div class="field-group" id="field-format">
+                <label for="format">Output Format</label>
+                <input type="text" id="format" placeholder="e.g., single file, full project, API endpoint">
             </div>
-            <div class="field-group">
-                <label for="edge_cases">What could go wrong?</label>
-                <textarea id="edge_cases" placeholder="Error states, empty data, invalid input, network issues"></textarea>
+            <div class="field-group" id="field-constraints">
+                <label for="constraints">Constraints / Requirements</label>
+                <input type="text" id="constraints" placeholder="Performance, browser support, deadlines">
             </div>
-        </section>
-
-        <section>
-            <h2>🛠 TECHNICAL</h2>
-            <div class="field-group">
-                <label for="stack">Tech Stack</label>
-                <input type="text" id="stack" placeholder="e.g., React, Node.js, PostgreSQL">
+            <div class="field-group" id="field-testing">
+                <label for="testing">Testing & Verification</label>
+                <input type="text" id="testing" placeholder="How to test: e.g., unit tests, manual check">
             </div>
-            <div class="field-group">
-                <label for="files">Files to modify</label>
-                <textarea id="files" placeholder="Which files should be changed?"></textarea>
-            </div>
-            <div class="field-group">
-                <label for="conventions">Code style</label>
-                <input type="text" id="conventions" placeholder="e.g., TypeScript strict, PEP8">
+            <div class="field-group" id="field-structure">
+                <label for="structure">File Structure</label>
+                <textarea id="structure" placeholder="Specific files to create/modify, folder layout"></textarea>
             </div>
         </section>
 
-        <section>
-            <h2>✅ VERIFY</h2>
-            <div class="field-group">
-                <label for="testing">How to test?</label>
-                <input type="text" id="testing" placeholder="e.g., Run pytest, npm test">
-            </div>
-        </section>
     </aside>
 
     <main class="main">
         <div class="preview-header">
-            <h2>🦊 Generated Prompt</h2>
+            <h2 style="border: none; padding: 0; font-size: 1rem; color: var(--accent-color);">🦊 Generated Prompt</h2>
             <div style="display: flex; align-items: center;">
                 <span id="copy-status" class="copy-success">Copied!</span>
                 <button class="btn btn-copy" onclick="copyPrompt()">Copy</button>
@@ -257,53 +279,235 @@
     </main>
 
     <script>
-        const inputs = [
-            'app_purpose', 'user_actions', 'example_usage',
-            'project_name', 'project_type', 'failure_state',
-            'core_features', 'nice_to_have', 'edge_cases', 'stack', 'files', 'conventions', 'testing'
-        ];
-        
-        const output = document.getElementById('prompt-output');
+        let currentType = 'code';
+
+        const inputs = ['main_idea', 'problem', 'style', 'requirements', 'audience', 'context', 'format', 'constraints', 'testing', 'structure'];
+
+        const typeConfig = {
+            code: {
+                detailsTitle: '📋 Technical Details',
+                styleLabel: 'Tech Stack / Framework',
+                stylePlaceholder: 'e.g., React, Node.js, TypeScript, PostgreSQL',
+                requirementsLabel: 'Features & Functionality',
+                requirementsPlaceholder: 'Key features, user interactions, data handling',
+                contextLabel: 'Existing Code / References',
+                contextPlaceholder: 'Files to modify, codebase patterns, libraries to use',
+                formatLabel: 'Output Format',
+                formatPlaceholder: 'e.g., single file, full project, API endpoint',
+                constraintsLabel: 'Constraints / Requirements',
+                constraintsPlaceholder: 'Performance needs, browser support, deadlines',
+                extra1Label: 'Testing & Verification',
+                extra1Placeholder: 'How to test: e.g., unit tests, manual check',
+                extra2Label: 'File Structure',
+                extra2Placeholder: 'Specific files to create/modify, folder layout'
+            },
+            image: {
+                detailsTitle: '🎨 Visual Details',
+                styleLabel: 'Art Style / Medium',
+                stylePlaceholder: 'e.g., photorealistic, oil painting, anime, 3D render',
+                requirementsLabel: 'Key Elements & Composition',
+                requirementsPlaceholder: 'Subjects, objects, atmosphere, lighting',
+                contextLabel: 'Color & Mood',
+                contextPlaceholder: 'Color palette, mood, emotional tone, reference artists',
+                formatLabel: 'Dimensions / Format',
+                formatPlaceholder: 'e.g., 1920x1080, square, portrait, landscape',
+                constraintsLabel: 'Style Constraints',
+                constraintsPlaceholder: 'Avoid elements, specific techniques',
+                extra1Label: 'Lighting',
+                extra1Placeholder: 'e.g., natural, studio, dramatic, soft, backlit',
+                extra2Label: 'Reference Images',
+                extra2Placeholder: 'Links or descriptions of reference images'
+            },
+            writing: {
+                detailsTitle: '✍ Content Details',
+                styleLabel: 'Tone / Voice',
+                stylePlaceholder: 'e.g., formal, casual, humorous, persuasive, academic',
+                requirementsLabel: 'Key Points & Structure',
+                requirementsPlaceholder: 'Main topics, arguments, sections to include',
+                contextLabel: 'Audience & Context',
+                contextPlaceholder: 'Reader knowledge level, publication context',
+                formatLabel: 'Format / Length',
+                formatPlaceholder: 'e.g., blog post, 1000 words, technical docs',
+                constraintsLabel: 'Writing Constraints',
+                constraintsPlaceholder: 'Avoid certain phrases, SEO keywords, style rules',
+                extra1Label: 'Deadline / Urgency',
+                extra1Placeholder: 'When needed, priority level',
+                extra2Label: 'SEO / Keywords',
+                extra2Placeholder: 'Keywords to include, search terms'
+            },
+            video: {
+                detailsTitle: '🎬 Production Details',
+                styleLabel: 'Visual Style / Mood',
+                stylePlaceholder: 'e.g., cinematic, documentary, animated, vlog',
+                requirementsLabel: 'Key Scenes / Shots',
+                requirementsPlaceholder: 'Scenes, transitions, specific shots needed',
+                contextLabel: 'Audio & Music',
+                contextPlaceholder: 'Background music, voiceover, sound effects',
+                formatLabel: 'Resolution / Aspect',
+                formatPlaceholder: 'e.g., 4K, 1080p, 16:9, 9:16, 60fps',
+                constraintsLabel: 'Production Constraints',
+                constraintsPlaceholder: 'Budget, length, animation style',
+                extra1Label: 'Duration',
+                extra1Placeholder: 'e.g., 30 seconds, 5 minutes, full episode',
+                extra2Label: 'Characters / Subjects',
+                extra2Placeholder: 'Who or what appears on screen'
+            }
+        };
+
+        function selectType(type) {
+            currentType = type;
+            document.querySelectorAll('.type-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.type === type);
+            });
+            const config = typeConfig[type];
+            document.getElementById('details-title').textContent = config.detailsTitle;
+            document.querySelector('#field-style label').textContent = config.styleLabel;
+            document.getElementById('style').placeholder = config.stylePlaceholder;
+            document.querySelector('#field-requirements label').textContent = config.requirementsLabel;
+            document.getElementById('requirements').placeholder = config.requirementsPlaceholder;
+            document.querySelector('#field-context label').textContent = config.contextLabel;
+            document.getElementById('context').placeholder = config.contextPlaceholder;
+            document.querySelector('#field-format label').textContent = config.formatLabel;
+            document.getElementById('format').placeholder = config.formatPlaceholder;
+            document.querySelector('#field-constraints label').textContent = config.constraintsLabel;
+            document.getElementById('constraints').placeholder = config.constraintsPlaceholder;
+            document.querySelector('#field-testing label').textContent = config.extra1Label;
+            document.getElementById('testing').placeholder = config.extra1Placeholder;
+            document.querySelector('#field-structure label').textContent = config.extra2Label;
+            document.getElementById('structure').placeholder = config.extra2Placeholder;
+            generatePrompt();
+        }
+
+        function getValue(id) {
+            const el = document.getElementById(id);
+            return el ? el.value.trim() : '';
+        }
 
         function generatePrompt() {
-            const data = {};
-            inputs.forEach(id => {
-                const el = document.getElementById(id);
-                data[id] = el ? el.value.trim() : '';
-            });
+            const mainIdea = getValue('main_idea');
+            const problem = getValue('problem');
+            const style = getValue('style');
+            const requirements = getValue('requirements');
+            const audience = getValue('audience');
+            const context = getValue('context');
+            const format = getValue('format');
+            const constraints = getValue('constraints');
+            const testing = getValue('testing');
+            const structure = getValue('structure');
 
-            let prompt = `# 🎯 WHAT SHOULD THIS APP DO?\n`;
-            prompt += `## Purpose\n${data.app_purpose || '[Describe what the app should do]'}\n\n`;
-            prompt += `## User Actions\n${data.user_actions || '[What can users do with this app]'}\n\n`;
-            prompt += `## Usage Example\n${data.example_usage || '[Walk through a user scenario]'}\n\n`;
+            const typeLabels = {
+                code: '💻 Code Development',
+                image: '🎨 Image Generation',
+                writing: '✍ Writing',
+                video: '🎬 Video Production'
+            };
 
-            prompt += `# 📋 PROJECT\n`;
-            prompt += `- **Name:** ${data.project_name || 'N/A'}\n`;
-            prompt += `- **Type:** ${data.project_type || 'N/A'}\n`;
-            if (data.failure_state) {
-                prompt += `## Current Problem\n${data.failure_state}\n\n`;
+            let prompt = `# ${typeLabels[currentType]} Prompt\n\n`;
+            
+            prompt += `## 🎯 Core Concept\n`;
+            prompt += `${mainIdea || '[Describe what you want to create]'}\n\n`;
+
+            if (problem) {
+                prompt += `## ❓ Problem Solved\n${problem}\n\n`;
             }
 
-            prompt += `# ✨ FEATURES\n`;
-            prompt += `## Must Have\n${data.core_features || '[List core features]'}\n\n`;
-            prompt += `## Nice to Have\n${data.nice_to_have || 'N/A'}\n\n`;
-            prompt += `## Edge Cases\n${data.edge_cases || 'N/A'}\n\n`;
+            if (requirements) {
+                prompt += `## 📦 Requirements\n${requirements}\n\n`;
+            }
 
-            prompt += `# 🛠 TECHNICAL\n`;
-            prompt += `- **Tech Stack:** ${data.stack || 'N/A'}\n`;
-            prompt += `- **Files:** ${data.files || 'N/A'}\n`;
-            prompt += `- **Code Style:** ${data.conventions || 'Follow existing patterns'}\n\n`;
+            if (style) {
+                if (currentType === 'code') {
+                    prompt += `## 🛠 Tech Stack\n${style}\n\n`;
+                } else if (currentType === 'image') {
+                    prompt += `## 🎨 Art Style\n${style}\n\n`;
+                } else if (currentType === 'writing') {
+                    prompt += `## 🎭 Tone & Voice\n${style}\n\n`;
+                } else if (currentType === 'video') {
+                    prompt += `## 🎬 Visual Style\n${style}\n\n`;
+                }
+            }
 
-            prompt += `# ✅ VERIFY\n`;
-            prompt += `${data.testing || 'Test the implementation'}\n\n`;
+            if (format) {
+                prompt += `## 📐 Output Format\n${format}\n\n`;
+            }
 
-            prompt += `# 🦊 INSTRUCTIONS\n`;
-            prompt += `1. Understand the goal and behavior\n`;
-            prompt += `2. Plan the implementation\n`;
-            prompt += `3. Implement with care\n`;
-            prompt += `4. Verify it works`;
+            if (audience) {
+                prompt += `## 👥 Target Audience\n${audience}\n\n`;
+            }
 
-            output.textContent = prompt;
+            if (context) {
+                prompt += `## 📚 Context & References\n${context}\n\n`;
+            }
+
+            if (constraints) {
+                prompt += `## ⚠ Constraints\n${constraints}\n\n`;
+            }
+
+            if (testing) {
+                if (currentType === 'code') {
+                    prompt += `## 🧪 Testing & Verification\n${testing}\n\n`;
+                }
+            }
+
+            if (structure) {
+                if (currentType === 'code') {
+                    prompt += `## 📁 File Structure\n${structure}\n\n`;
+                }
+            }
+
+            if (currentType === 'image') {
+                const lighting = getValue('testing');
+                const references = getValue('structure');
+                if (lighting) prompt += `## 💡 Lighting\n${lighting}\n\n`;
+                if (references) prompt += `## 🖼 Reference Images\n${references}\n\n`;
+            }
+
+            if (currentType === 'writing') {
+                const deadline = getValue('testing');
+                const seo = getValue('structure');
+                if (deadline) prompt += `## ⏰ Deadline\n${deadline}\n\n`;
+                if (seo) prompt += `## 🔍 SEO / Keywords\n${seo}\n\n`;
+            }
+
+            if (currentType === 'video') {
+                const duration = getValue('testing');
+                const characters = getValue('structure');
+                if (duration) prompt += `## ⏱ Duration\n${duration}\n\n`;
+                if (characters) prompt += `## 🎭 Characters / Subjects\n${characters}\n\n`;
+            }
+
+            prompt += `## ✅ Quality Requirements\n`;
+            if (currentType === 'code') {
+                prompt += `- Write clean, modular, well-documented code\n`;
+                prompt += `- Follow best practices for the chosen tech stack\n`;
+                prompt += `- Include proper error handling and edge cases\n`;
+                prompt += `- Ensure code is functional, complete, and production-ready\n`;
+                prompt += `- Add comments explaining complex logic\n`;
+                prompt += `- Consider security, performance, and accessibility\n`;
+            } else if (currentType === 'image') {
+                prompt += `- Create visually compelling, balanced composition\n`;
+                prompt += `- Ensure proper lighting, shadows, and depth\n`;
+                prompt += `- Pay attention to details, textures, and materials\n`;
+                prompt += `- Match the specified art style consistently\n`;
+                prompt += `- Deliver high-resolution, polished output\n`;
+                prompt += `- Avoid artifacts, distortions, or visual errors\n`;
+            } else if (currentType === 'writing') {
+                prompt += `- Write engaging, well-structured content\n`;
+                prompt += `- Ensure clarity, coherence, and logical flow\n`;
+                prompt += `- Match the requested tone and voice throughout\n`;
+                prompt += `- Use appropriate vocabulary for the audience\n`;
+                prompt += `- Include all required key points and sections\n`;
+                prompt += `- Deliver polished, publication-ready text\n`;
+            } else if (currentType === 'video') {
+                prompt += `- Plan coherent visual storytelling with clear narrative\n`;
+                prompt += `- Ensure smooth transitions, pacing, and timing\n`;
+                prompt += `- Match mood and tone consistently throughout\n`;
+                prompt += `- Use appropriate camera angles and shot types\n`;
+                prompt += `- Sync audio and visuals effectively\n`;
+                prompt += `- Deliver production-ready, professional output\n`;
+            }
+
+            document.getElementById('prompt-output').textContent = prompt;
         }
 
         inputs.forEach(id => {
@@ -311,7 +515,7 @@
         });
 
         function copyPrompt() {
-            navigator.clipboard.writeText(output.textContent).then(() => {
+            navigator.clipboard.writeText(document.getElementById('prompt-output').textContent).then(() => {
                 const status = document.getElementById('copy-status');
                 status.classList.add('visible');
                 setTimeout(() => status.classList.remove('visible'), 2000);
