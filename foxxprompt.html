@@ -9,19 +9,15 @@
             --bg-color: #0d1117;
             --sidebar-bg: #161b22;
             --text-color: #c9d1d9;
-            --accent-color: #ff8c00; /* Fox Orange */
+            --accent-color: #ff8c00;
             --accent-hover: #ff9f2e;
-            --border-color: #3e2723; /* Earthy Dark */
+            --border-color: #3e2723;
             --input-bg: #0d1117;
             --button-hover: #e67e22;
             --mono-font: 'Fira Code', 'Courier New', monospace;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
@@ -32,7 +28,6 @@
             overflow: hidden;
         }
 
-        /* Layout Structure */
         .sidebar {
             width: 500px;
             background-color: var(--sidebar-bg);
@@ -41,7 +36,7 @@
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 15px;
         }
 
         .main {
@@ -53,7 +48,6 @@
             background-color: var(--bg-color);
         }
 
-        /* Typography */
         h1 {
             font-size: 1.6rem;
             color: var(--accent-color);
@@ -72,15 +66,12 @@
             letter-spacing: 0.1rem;
             color: #ffb74d;
             margin-bottom: 12px;
-            margin-top: 20px;
+            margin-top: 15px;
             border-left: 3px solid var(--accent-color);
             padding-left: 8px;
         }
 
-        /* Form Elements */
-        .field-group {
-            margin-bottom: 15px;
-        }
+        .field-group { margin-bottom: 12px; }
 
         label {
             display: block;
@@ -90,9 +81,7 @@
             color: #d1d5db;
         }
 
-        input[type="text"],
-        textarea,
-        select {
+        input[type="text"], textarea, select {
             width: 100%;
             background-color: var(--input-bg);
             border: 1px solid var(--border-color);
@@ -103,10 +92,7 @@
             font-family: var(--mono-font);
         }
 
-        textarea {
-            resize: vertical;
-            min-height: 70px;
-        }
+        textarea { resize: vertical; min-height: 60px; }
 
         input:focus, textarea:focus {
             outline: none;
@@ -114,7 +100,6 @@
             box-shadow: 0 0 0 3px rgba(255, 140, 0, 0.2);
         }
 
-        /* Prompt Preview */
         .preview-header {
             display: flex;
             justify-content: space-between;
@@ -136,9 +121,8 @@
             color: #e6edf3;
         }
 
-        /* Buttons */
         .btn {
-            background-color: #d35400; /* Deep Fox Orange */
+            background-color: #d35400;
             color: white;
             border: none;
             border-radius: 6px;
@@ -152,10 +136,7 @@
             gap: 6px;
         }
 
-        .btn:hover {
-            background-color: var(--accent-hover);
-            transform: translateY(-1px);
-        }
+        .btn:hover { background-color: var(--accent-hover); transform: translateY(-1px); }
 
         .btn-copy {
             background-color: #2c1e14;
@@ -163,11 +144,8 @@
             color: var(--accent-color);
         }
 
-        .btn-copy:hover {
-            background-color: #3e2723;
-        }
+        .btn-copy:hover { background-color: #3e2723; }
 
-        /* Animation */
         .copy-success {
             color: #ffb74d;
             font-size: 0.8rem;
@@ -176,14 +154,9 @@
             transition: opacity 0.3s;
         }
 
-        .copy-success.visible {
-            opacity: 1;
-        }
+        .copy-success.visible { opacity: 1; }
 
-        section {
-            padding-bottom: 15px;
-            border-bottom: 1px solid #2c1e14;
-        }
+        section { padding-bottom: 10px; border-bottom: 1px solid #2c1e14; }
     </style>
 </head>
 <body>
@@ -192,80 +165,92 @@
         <h1>🦊 foxxprompt</h1>
 
         <section>
-            <h2>🎯 CORE OBJECTIVE</h2>
+            <h2>🎯 WHAT SHOULD THIS APP DO?</h2>
             <div class="field-group">
-                <label for="goal">Primary Goal & Intent</label>
-                <textarea id="goal" placeholder="What is the ultimate outcome? Explain the 'why' and 'what'."></textarea>
+                <label for="app_purpose">Main purpose of this app</label>
+                <textarea id="app_purpose" placeholder="What does this app do? What problem does it solve?"></textarea>
             </div>
             <div class="field-group">
-                <label for="failure_state">Current Failure State (if bug)</label>
-                <textarea id="failure_state" placeholder="Describe the error, stack trace, or incorrect behavior."></textarea>
-            </div>
-        </section>
-
-        <section>
-            <h2>🏗️ ARCHITECTURAL CONTEXT</h2>
-            <div class="field-group">
-                <label for="stack">Tech Stack & Versions</label>
-                <input type="text" id="stack" placeholder="e.g., Python 3.12, FastAPI, SQLAlchemy 2.0, PostgreSQL 16">
+                <label for="user_actions">What can users do?</label>
+                <textarea id="user_actions" placeholder="Create, read, update, delete? Search? Export? Submit forms?"></textarea>
             </div>
             <div class="field-group">
-                <label for="files">Relevant File Paths</label>
-                <textarea id="files" placeholder="List the specific files that must be modified or referenced."></textarea>
-            </div>
-            <div class="field-group">
-                <label for="patterns">Design Patterns & Data Flow</label>
-                <textarea id="patterns" placeholder="e.g., Repository pattern, Event-driven via Redis, Hexagonal Architecture."></textarea>
-            </div>
-            <div class="field-group">
-                <label for="schema">Database Schema / API Specs</label>
-                <textarea id="schema" placeholder="Describe relevant tables, fields, or API endpoints involved."></textarea>
+                <label for="example_usage">Example: A user opens the app and...</label>
+                <textarea id="example_usage" placeholder="Step by step: User does X → sees Y → gets result Z"></textarea>
             </div>
         </section>
 
         <section>
-            <h2>🛠️ RIGOROUS CONSTRAINTS</h2>
+            <h2>📋 PROJECT</h2>
             <div class="field-group">
-                <label for="conventions">Coding Style & Guidelines</label>
-                <textarea id="conventions" placeholder="e.g., Use functional components, strict typing, Airbnb style, JSDoc."></textarea>
+                <label for="project_name">Project Name</label>
+                <input type="text" id="project_name" placeholder="My Awesome App">
             </div>
             <div class="field-group">
-                <label for="security">Security & Compliance</label>
-                <textarea id="security" placeholder="e.g., No PII in logs, Sanitize all inputs, Use bcrypt for passwords."></textarea>
+                <label for="project_type">Project Type</label>
+                <select id="project_type">
+                    <option value="">Select type...</option>
+                    <option value="new">New Project</option>
+                    <option value="feature">Add Feature</option>
+                    <option value="bugfix">Bug Fix</option>
+                    <option value="refactor">Refactor</option>
+                    <option value="api">API</option>
+                    <option value="cli">CLI Tool</option>
+                </select>
             </div>
             <div class="field-group">
-                <label for="performance">Performance & Scalability</label>
-                <input type="text" id="performance" placeholder="e.g., Avoid O(n^2), Use streams for large files, Caching strategy.">
-            </div>
-            <div class="field-group">
-                <label for="dependencies">Dependency Restrictions</label>
-                <textarea id="dependencies" placeholder="e.g., Do not add new NPM packages, Use native Node modules where possible."></textarea>
-            </div>
-            <div class="field-group">
-                <label for="edge_cases">Edge Cases & Error Handling</label>
-                <textarea id="edge_cases" placeholder="How should we handle network timeouts, empty states, or invalid data?"></textarea>
+                <label for="failure_state">Current Problem (if bug)</label>
+                <textarea id="failure_state" placeholder="Describe the error or incorrect behavior"></textarea>
             </div>
         </section>
 
         <section>
-            <h2>✅ VERIFICATION STRATEGY</h2>
+            <h2>✨ FEATURES</h2>
             <div class="field-group">
-                <label for="testing">Test Suite & Runner</label>
-                <input type="text" id="testing" placeholder="e.g., Pytest with 90% coverage requirement, Vitest.">
+                <label for="core_features">Must-have features</label>
+                <textarea id="core_features" placeholder="List essential features"></textarea>
             </div>
             <div class="field-group">
-                <label for="verification">Step-by-Step Validation</label>
-                <textarea id="verification" placeholder="1. Run unit tests. 2. Verify with manual curl. 3. Check logs for X."></textarea>
+                <label for="nice_to_have">Nice-to-have (if time permits)</label>
+                <textarea id="nice_to_have" placeholder="Extra features that would be great"></textarea>
+            </div>
+            <div class="field-group">
+                <label for="edge_cases">What could go wrong?</label>
+                <textarea id="edge_cases" placeholder="Error states, empty data, invalid input, network issues"></textarea>
+            </div>
+        </section>
+
+        <section>
+            <h2>🛠 TECHNICAL</h2>
+            <div class="field-group">
+                <label for="stack">Tech Stack</label>
+                <input type="text" id="stack" placeholder="e.g., React, Node.js, PostgreSQL">
+            </div>
+            <div class="field-group">
+                <label for="files">Files to modify</label>
+                <textarea id="files" placeholder="Which files should be changed?"></textarea>
+            </div>
+            <div class="field-group">
+                <label for="conventions">Code style</label>
+                <input type="text" id="conventions" placeholder="e.g., TypeScript strict, PEP8">
+            </div>
+        </section>
+
+        <section>
+            <h2>✅ VERIFY</h2>
+            <div class="field-group">
+                <label for="testing">How to test?</label>
+                <input type="text" id="testing" placeholder="e.g., Run pytest, npm test">
             </div>
         </section>
     </aside>
 
     <main class="main">
         <div class="preview-header">
-            <h2>🦊 Generated Markdown Prompt</h2>
+            <h2>🦊 Generated Prompt</h2>
             <div style="display: flex; align-items: center;">
-                <span id="copy-status" class="copy-success">🐾 Snatched!</span>
-                <button class="btn btn-copy" onclick="copyPrompt()">🐾 Copy to Clipboard</button>
+                <span id="copy-status" class="copy-success">Copied!</span>
+                <button class="btn btn-copy" onclick="copyPrompt()">Copy</button>
             </div>
         </div>
         <div id="prompt-output"></div>
@@ -273,9 +258,9 @@
 
     <script>
         const inputs = [
-            'goal', 'failure_state', 'stack', 'files', 'patterns', 'schema',
-            'conventions', 'security', 'performance', 'dependencies', 'edge_cases',
-            'testing', 'verification'
+            'app_purpose', 'user_actions', 'example_usage',
+            'project_name', 'project_type', 'failure_state',
+            'core_features', 'nice_to_have', 'edge_cases', 'stack', 'files', 'conventions', 'testing'
         ];
         
         const output = document.getElementById('prompt-output');
@@ -283,37 +268,40 @@
         function generatePrompt() {
             const data = {};
             inputs.forEach(id => {
-                data[id] = document.getElementById(id).value.trim();
+                const el = document.getElementById(id);
+                data[id] = el ? el.value.trim() : '';
             });
 
-            let prompt = `# 🦊 CORE OBJECTIVE\n${data.goal || '[Explain your primary goal]'}\n\n`;
-            
+            let prompt = `# 🎯 WHAT SHOULD THIS APP DO?\n`;
+            prompt += `## Purpose\n${data.app_purpose || '[Describe what the app should do]'}\n\n`;
+            prompt += `## User Actions\n${data.user_actions || '[What can users do with this app]'}\n\n`;
+            prompt += `## Usage Example\n${data.example_usage || '[Walk through a user scenario]'}\n\n`;
+
+            prompt += `# 📋 PROJECT\n`;
+            prompt += `- **Name:** ${data.project_name || 'N/A'}\n`;
+            prompt += `- **Type:** ${data.project_type || 'N/A'}\n`;
             if (data.failure_state) {
-                prompt += `## ❌ CURRENT FAILURE STATE\n${data.failure_state}\n\n`;
+                prompt += `## Current Problem\n${data.failure_state}\n\n`;
             }
 
-            prompt += `# 🏗️ ARCHITECTURAL CONTEXT\n`;
+            prompt += `# ✨ FEATURES\n`;
+            prompt += `## Must Have\n${data.core_features || '[List core features]'}\n\n`;
+            prompt += `## Nice to Have\n${data.nice_to_have || 'N/A'}\n\n`;
+            prompt += `## Edge Cases\n${data.edge_cases || 'N/A'}\n\n`;
+
+            prompt += `# 🛠 TECHNICAL\n`;
             prompt += `- **Tech Stack:** ${data.stack || 'N/A'}\n`;
-            prompt += `- **Key File Paths:** ${data.files || 'N/A'}\n`;
-            prompt += `- **Design Patterns & Data Flow:** ${data.patterns || 'N/A'}\n`;
-            prompt += `- **Database / API Specs:** ${data.schema || 'N/A'}\n\n`;
+            prompt += `- **Files:** ${data.files || 'N/A'}\n`;
+            prompt += `- **Code Style:** ${data.conventions || 'Follow existing patterns'}\n\n`;
 
-            prompt += `# 🛠️ RIGOROUS CONSTRAINTS\n`;
-            prompt += `## 📜 Coding Standards\n${data.conventions || 'Follow existing codebase patterns.'}\n\n`;
-            prompt += `## 🔒 Security & Compliance\n${data.security || 'Ensure standard security practices are followed.'}\n\n`;
-            prompt += `## 🚀 Performance & Scalability\n${data.performance || 'Optimize for standard performance metrics.'}\n\n`;
-            prompt += `## 📦 Dependency Restrictions\n${data.dependencies || 'N/A'}\n\n`;
-            prompt += `## ⚠️ Edge Cases & Error Handling\n${data.edge_cases || 'Handle all standard edge cases and potential failures.'}\n\n`;
+            prompt += `# ✅ VERIFY\n`;
+            prompt += `${data.testing || 'Test the implementation'}\n\n`;
 
-            prompt += `# ✅ VERIFICATION & TESTING\n`;
-            prompt += `- **Test Suite:** ${data.testing || 'N/A'}\n`;
-            prompt += `## 🧪 Validation Steps\n${data.verification || 'Verify implementation with comprehensive tests.'}\n\n`;
-
-            prompt += `# 🦊 INSTRUCTIONS FOR AGENT\n`;
-            prompt += `1. **Research Phase:** Systematically map the codebase and validate all architectural assumptions.\n`;
-            prompt += `2. **Strategy Phase:** Formulate a surgical, idiomatic plan that respects all listed constraints.\n`;
-            prompt += `3. **Execution Phase:** Implement the changes, ensuring they are complete and follow local conventions.\n`;
-            prompt += `4. **Validation Phase:** Rigorously verify the solution using the specified verification strategy.`;
+            prompt += `# 🦊 INSTRUCTIONS\n`;
+            prompt += `1. Understand the goal and behavior\n`;
+            prompt += `2. Plan the implementation\n`;
+            prompt += `3. Implement with care\n`;
+            prompt += `4. Verify it works`;
 
             output.textContent = prompt;
         }
@@ -323,15 +311,13 @@
         });
 
         function copyPrompt() {
-            const text = output.textContent;
-            navigator.clipboard.writeText(text).then(() => {
+            navigator.clipboard.writeText(output.textContent).then(() => {
                 const status = document.getElementById('copy-status');
                 status.classList.add('visible');
                 setTimeout(() => status.classList.remove('visible'), 2000);
             });
         }
 
-        // Initial generation
         generatePrompt();
     </script>
 </body>
