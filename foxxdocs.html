@@ -1,0 +1,2151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🦊 FoxxDocs - Document Editor</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📄</text></svg>">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/handsontable@14.0.0/dist/handsontable.min.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --fox-primary: #E65C00;
+            --fox-secondary: #F9A825;
+            --fox-accent: #FF7043;
+            --glass-surface: rgba(255, 255, 255, 0.12);
+            --glass-border: rgba(255, 255, 255, 0.18);
+            --text-primary: #202124;
+            --text-secondary: #5f6368;
+            --toolbar-bg: #ffffff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #fefefe;
+            min-height: 100vh;
+            color: var(--text-primary);
+            overflow-x: hidden;
+        }
+
+        .liquid-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f97316 100%);
+        }
+
+        .liquid-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.6;
+            animation: float 20s ease-in-out infinite;
+        }
+
+        .liquid-orb:nth-child(1) { width: 600px; height: 600px; background: radial-gradient(circle, #ff6b35 0%, transparent 70%); top: -200px; left: -100px; animation-delay: 0s; }
+        .liquid-orb:nth-child(2) { width: 500px; height: 500px; background: radial-gradient(circle, #feca57 0%, transparent 70%); top: 50%; right: -150px; animation-delay: -5s; }
+        .liquid-orb:nth-child(3) { width: 400px; height: 400px; background: radial-gradient(circle, #48dbfb 0%, transparent 70%); bottom: -100px; left: 30%; animation-delay: -10s; }
+        .liquid-orb:nth-child(4) { width: 350px; height: 350px; background: radial-gradient(circle, #ff9ff3 0%, transparent 70%); top: 20%; left: 50%; animation-delay: -15s; }
+        .liquid-orb:nth-child(5) { width: 450px; height: 450px; background: radial-gradient(circle, #1dd1a1 0%, transparent 70%); bottom: 20%; right: 20%; animation-delay: -7s; }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); }
+            25% { transform: translate(50px, -30px) scale(1.1) rotate(5deg); }
+            50% { transform: translate(-30px, 50px) scale(0.95) rotate(-5deg); }
+            75% { transform: translate(-50px, -20px) scale(1.05) rotate(3deg); }
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+        }
+
+        #loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f97316 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+
+        #loading-screen.hidden { opacity: 0; visibility: hidden; }
+
+        .loading-fox {
+            font-size: 80px;
+            animation: bounce-fox 1s ease-in-out infinite;
+            filter: drop-shadow(0 10px 30px rgba(0,0,0,0.3));
+        }
+
+        @keyframes bounce-fox {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-20px) scale(1.1); }
+        }
+
+        .loading-text {
+            margin-top: 20px;
+            font-family: 'Google Sans', sans-serif;
+            font-size: 24px;
+            font-weight: 500;
+            color: white;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        #welcome-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 5000;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+        }
+
+        #welcome-modal.hidden { display: none; }
+
+        .welcome-card {
+            background: white;
+            border-radius: 24px;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: modal-appear 0.4s ease-out;
+        }
+
+        @keyframes modal-appear {
+            from { opacity: 0; transform: scale(0.9) translateY(20px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .welcome-logo { font-size: 60px; margin-bottom: 16px; }
+        .welcome-title { font-family: 'Google Sans', sans-serif; font-size: 28px; font-weight: 500; margin-bottom: 8px; }
+        .welcome-subtitle { color: var(--text-secondary); margin-bottom: 32px; }
+
+        .welcome-actions { display: flex; flex-direction: column; gap: 12px; }
+
+        .welcome-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 16px 24px;
+            border: none;
+            border-radius: 12px;
+            font-family: 'Google Sans', sans-serif;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .welcome-btn.primary {
+            background: linear-gradient(135deg, #ff6b35, #f97316);
+            color: white;
+            box-shadow: 0 4px 15px rgba(249, 115, 22, 0.4);
+        }
+
+        .welcome-btn.primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(249, 115, 22, 0.5);
+        }
+
+        .welcome-btn.secondary {
+            background: white;
+            color: var(--text-primary);
+            border: 1px solid #dadce0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .welcome-btn.secondary:hover {
+            background: #f8f9fa;
+            transform: translateY(-2px);
+        }
+
+        .welcome-divider {
+            display: flex;
+            align-items: center;
+            margin: 24px 0;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .welcome-divider::before, .welcome-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: #dadce0;
+        }
+
+        .welcome-divider span { padding: 0 16px; }
+
+        #app {
+            display: none;
+            min-height: 100vh;
+            flex-direction: column;
+        }
+
+        #app.visible { display: flex; }
+
+        .app-toolbar {
+            background: var(--toolbar-bg);
+            border-bottom: 1px solid #dadce0;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .toolbar-left { display: flex; align-items: center; gap: 16px; }
+
+        .app-logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Google Sans', sans-serif;
+            font-size: 22px;
+            font-weight: 500;
+            color: #5f6368;
+        }
+
+        .app-logo span { color: #ff6b35; }
+
+        .doc-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .doc-title:hover { background: rgba(0, 0, 0, 0.05); }
+        .doc-title-text { font-size: 14px; font-weight: 500; }
+        .unsaved-star { color: #5f6368; font-size: 18px; }
+        .unsaved-star.visible { color: #f97316; }
+
+        .toolbar-center { display: flex; align-items: center; gap: 8px; }
+
+        .format-tabs {
+            display: flex;
+            background: #f1f3f4;
+            border-radius: 8px;
+            padding: 4px;
+        }
+
+        .format-tab {
+            padding: 8px 16px;
+            border: none;
+            background: transparent;
+            border-radius: 6px;
+            font-family: 'Google Sans', sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .format-tab:hover { color: var(--text-primary); }
+
+        .format-tab.active {
+            background: white;
+            color: var(--text-primary);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .toolbar-right { display: flex; align-items: center; gap: 8px; }
+
+        .toolbar-btn {
+            width: 40px;
+            height: 40px;
+            border: none;
+            background: transparent;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: var(--text-secondary);
+            transition: all 0.2s;
+        }
+
+        .toolbar-btn:hover {
+            background: rgba(0, 0, 0, 0.05);
+            color: var(--text-primary);
+        }
+
+        .toolbar-btn.primary {
+            background: #ff6b35;
+            color: white;
+            box-shadow: 0 2px 8px rgba(249, 115, 22, 0.4);
+        }
+
+        .toolbar-btn.primary:hover {
+            background: #f97316;
+            transform: scale(1.05);
+        }
+
+        .editor-wrapper {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            padding: 24px;
+            overflow: auto;
+        }
+
+        .editor-container {
+            display: none;
+            width: 100%;
+            max-width: 900px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .editor-container.active { display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .editor-paper {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 4px 12px rgba(0, 0, 0, 0.08);
+            min-height: 800px;
+            overflow: hidden;
+        }
+
+        .ql-toolbar.ql-snow {
+            background: white;
+            border: none !important;
+            border-bottom: 1px solid #f1f3f4 !important;
+            padding: 12px 16px !important;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .ql-toolbar.ql-snow .ql-formats { margin-right: 12px; }
+
+        .ql-container.ql-snow {
+            border: none !important;
+            font-family: 'Roboto', sans-serif !important;
+            font-size: 16px !important;
+        }
+
+        .ql-editor {
+            padding: 48px 56px !important;
+            min-height: 700px;
+            line-height: 1.8;
+            color: #202124;
+        }
+
+        .ql-editor.ql-blank::before {
+            color: #5f6368 !important;
+            font-style: normal !important;
+            left: 56px;
+        }
+
+        .ql-snow .ql-stroke { stroke: #5f6368 !important; }
+        .ql-snow .ql-fill { fill: #5f6368 !important; }
+        .ql-snow .ql-picker { color: #5f6368 !important; }
+
+        .ql-snow .ql-picker-options {
+            background: white !important;
+            border: 1px solid #dadce0 !important;
+            border-radius: 8px !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+        }
+
+        .ql-editor h1 { font-size: 32px; margin-bottom: 16px; }
+        .ql-editor h2 { font-size: 24px; margin-bottom: 12px; }
+        .ql-editor h3 { font-size: 20px; margin-bottom: 8px; }
+        
+        /* KaTeX math formula styling */
+        .ql-editor .katex-display {
+            margin: 16px 0;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.03);
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+        
+        .ql-editor .katex {
+            font-size: 1.1em;
+        }
+        
+        /* Math help tooltip */
+        .math-help {
+            font-size: 12px;
+            color: #5f6368;
+            padding: 8px 16px;
+            border-top: 1px solid #e8eaed;
+            margin-top: 8px;
+        }
+
+        .spreadsheet-wrapper {
+            padding: 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        #spreadsheet-container.handsontable {
+            width: 100%;
+            min-height: 700px;
+        }
+
+        .handsontable .htCore td, .handsontable .htCore th {
+            background: white !important;
+            color: #202124 !important;
+            border-color: #e8eaed !important;
+            font-size: 13px;
+        }
+
+        .handsontable .htCore td.area {
+            background: rgba(255, 107, 53, 0.1) !important;
+        }
+
+        .handsontable .htCore th {
+            background: #f8f9fa !important;
+            font-weight: 500 !important;
+        }
+
+        /* PDF Annotation Editor */
+        .pdf-annotation-wrapper {
+            background: #f5f5f5;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            min-height: 800px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .pdf-toolbar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            background: white;
+            border-bottom: 1px solid #dadce0;
+            flex-wrap: wrap;
+        }
+
+        .pdf-toolbar-group {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding-right: 12px;
+            border-right: 1px solid #e8eaed;
+        }
+
+        .pdf-toolbar-group:last-child {
+            border-right: none;
+        }
+
+        .pdf-tool-btn {
+            width: 36px;
+            height: 36px;
+            border: none;
+            background: transparent;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            color: #5f6368;
+            transition: all 0.2s;
+        }
+
+        .pdf-tool-btn:hover {
+            background: #f1f3f4;
+            color: #202124;
+        }
+
+        .pdf-tool-btn.active {
+            background: #feefc3;
+            color: #f97316;
+        }
+
+        .pdf-color-picker {
+            width: 28px;
+            height: 28px;
+            border: 2px solid #dadce0;
+            border-radius: 50%;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        .pdf-size-slider {
+            width: 80px;
+            cursor: pointer;
+        }
+
+        .pdf-page-nav {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .pdf-page-input {
+            width: 50px;
+            text-align: center;
+            padding: 4px;
+            border: 1px solid #dadce0;
+            border-radius: 4px;
+        }
+
+        .pdf-canvas-container {
+            flex: 1;
+            overflow: auto;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .pdf-page-wrapper {
+            position: relative;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .pdf-canvas {
+            display: block;
+        }
+
+        .annotation-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            cursor: crosshair;
+        }
+
+        .pdf-empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #5f6368;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .pdf-empty-state h3 {
+            margin-bottom: 16px;
+            color: #202124;
+        }
+
+        .pdf-empty-state p {
+            margin-bottom: 24px;
+            max-width: 400px;
+            line-height: 1.6;
+        }
+
+        .pdf-empty-state button {
+            padding: 12px 24px;
+            background: #ff6b35;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(249, 115, 22, 0.4);
+        }
+
+        .pdf-empty-state button:hover {
+            background: #f97316;
+            transform: translateY(-2px);
+        }
+            outline: none;
+        }
+
+        #pdf-content::placeholder { color: #9aa0a6; }
+
+        .status-bar {
+            background: var(--toolbar-bg);
+            border-top: 1px solid #dadce0;
+            padding: 8px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        #file-input { display: none; }
+
+        @media (max-width: 900px) {
+            .app-toolbar { flex-wrap: wrap; gap: 12px; }
+            .toolbar-center { order: 3; width: 100%; justify-content: center; }
+            .format-tabs { width: 100%; justify-content: center; }
+            .editor-paper { border-radius: 0; }
+            .ql-editor { padding: 24px !important; }
+            .pdf-editor-wrapper { padding: 24px; }
+        }
+
+        @media (max-width: 600px) {
+            .app-logo span { display: none; }
+            .format-tab span { display: none; }
+        }
+
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #dadce0; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #bdc1c6; }
+    </style>
+</head>
+<body>
+    <div class="liquid-bg">
+        <div class="liquid-orb"></div>
+        <div class="liquid-orb"></div>
+        <div class="liquid-orb"></div>
+        <div class="liquid-orb"></div>
+        <div class="liquid-orb"></div>
+    </div>
+
+    <div id="loading-screen">
+        <div class="loading-fox">🦊</div>
+        <div class="loading-text">Loading FoxxDocs...</div>
+    </div>
+
+    <div id="welcome-modal">
+        <div class="welcome-card">
+            <div class="welcome-logo">🦊</div>
+            <h1 class="welcome-title">Welcome to FoxxDocs</h1>
+            <p class="welcome-subtitle">Create or open documents with ease</p>
+            <div class="welcome-actions">
+                <button class="welcome-btn primary" onclick="createNewDoc()">
+                    📝 Create New Document
+                </button>
+                <button class="welcome-btn secondary" onclick="openExistingFile()">
+                    📂 Open Existing File
+                </button>
+            </div>
+            <div class="welcome-divider">
+                <span>or continue working on</span>
+            </div>
+            <button class="welcome-btn secondary" onclick="continueLastSession()" style="width: 100%;">
+                ♻️ Continue Last Session
+            </button>
+        </div>
+    </div>
+
+    <div id="app">
+        <header class="app-toolbar">
+            <div class="toolbar-left">
+                <div class="app-logo">
+                    <span>🦊 FoxxDocs</span>
+                </div>
+                <div class="doc-title" onclick="renameDocument()">
+                    <span class="doc-title-text" id="doc-title-text">Untitled Document</span>
+                    <span class="unsaved-star" id="unsaved-star">•</span>
+                </div>
+            </div>
+            
+            <div class="toolbar-center">
+                <div class="format-tabs">
+                    <button class="format-tab active" data-format="word" onclick="switchFormat('word')">
+                        📝 <span>Document</span>
+                    </button>
+                    <button class="format-tab" data-format="excel" onclick="switchFormat('excel')">
+                        📊 <span>Spreadsheet</span>
+                    </button>
+                    <button class="format-tab" data-format="pdf" onclick="switchFormat('pdf')">
+                        📄 <span>PDF</span>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="toolbar-right">
+                <button class="toolbar-btn" onclick="newDocument()" title="New (Ctrl+N)">➕</button>
+                <button class="toolbar-btn" onclick="openFile()" title="Open (Ctrl+O)">📂</button>
+                <button class="toolbar-btn primary" onclick="saveFile()" title="Save (Ctrl+S)">💾</button>
+                <button class="toolbar-btn" onclick="exportToPDF()" title="Export PDF">📄</button>
+                <button class="toolbar-btn" onclick="downloadAsDOCX()" title="Export as DOCX">📃</button>
+                <button class="toolbar-btn" onclick="downloadAsXLSX()" title="Export as XLSX">📊</button>
+                <button class="toolbar-btn" onclick="showFormatMenu()" title="More formats">⬇️</button>
+            </div>
+        </header>
+
+        <main class="editor-wrapper">
+            <div id="word-editor" class="editor-container">
+                <div class="editor-paper">
+                    <div id="quill-editor"></div>
+                </div>
+            </div>
+
+            <div id="excel-editor" class="editor-container">
+                <div class="spreadsheet-wrapper">
+                    <div id="spreadsheet-container"></div>
+                </div>
+            </div>
+
+            <div id="pdf-editor" class="editor-container">
+                <!-- Hidden textarea for backward compatibility -->
+                <textarea id="pdf-content" style="display:none"></textarea>
+                <div class="pdf-annotation-wrapper">
+                    <div class="pdf-toolbar">
+                        <div class="pdf-toolbar-group">
+                            <button class="pdf-tool-btn active" id="tool-select" onclick="setPdfTool('select')" title="Select">👆</button>
+                            <button class="pdf-tool-btn" id="tool-pen" onclick="setPdfTool('pen')" title="Draw">✏️</button>
+                            <button class="pdf-tool-btn" id="tool-highlight" onclick="setPdfTool('highlight')" title="Highlight">🖍️</button>
+                            <button class="pdf-tool-btn" id="tool-text" onclick="setPdfTool('text')" title="Add Text">🔤</button>
+                            <button class="pdf-tool-btn" id="tool-eraser" onclick="setPdfTool('eraser')" title="Eraser">🧹</button>
+                        </div>
+                        <div class="pdf-toolbar-group">
+                            <input type="color" class="pdf-color-picker" id="pdf-color" value="#000000" title="Color">
+                            <input type="color" class="pdf-color-picker" id="pdf-highlight-color" value="#ffff00" title="Highlight Color" style="display:none">
+                            <input type="range" class="pdf-size-slider" id="pdf-size" min="1" max="20" value="2" title="Size">
+                            <span id="pdf-size-label" style="font-size:12px;color:#5f6368">2px</span>
+                        </div>
+                        <div class="pdf-toolbar-group">
+                            <button class="pdf-tool-btn" onclick="undoPdfAnnotation()" title="Undo">↩️</button>
+                            <button class="pdf-tool-btn" onclick="redoPdfAnnotation()" title="Redo">↪️</button>
+                            <button class="pdf-tool-btn" onclick="clearPdfPage()" title="Clear Page">🗑️</button>
+                        </div>
+                        <div class="pdf-toolbar-group pdf-page-nav">
+                            <button class="pdf-tool-btn" onclick="prevPdfPage()">◀</button>
+                            <input type="number" class="pdf-page-input" id="pdf-page-num" value="1" min="1">
+                            <span>/ <span id="pdf-total-pages">1</span></span>
+                            <button class="pdf-tool-btn" onclick="nextPdfPage()">▶</button>
+                        </div>
+                        <div class="pdf-toolbar-group" style="margin-left:auto">
+                            <button class="pdf-tool-btn" onclick="addPdfPage()" title="Add Page">➕</button>
+                            <button class="pdf-tool-btn" onclick="loadPdfForAnnotation()" title="Open PDF">📂</button>
+                            <button class="pdf-tool-btn" style="background:#ff6b35;color:white" onclick="exportAnnotatedPdf()" title="Export PDF">💾</button>
+                        </div>
+                    </div>
+                    <div class="pdf-canvas-container" id="pdf-canvas-container">
+                        <div class="pdf-empty-state" id="pdf-empty-state">
+                            <h3>🦊 PDF Annotation</h3>
+                            <p>Open a PDF to annotate, or create a new blank page. You can draw, highlight, add text, and more!</p>
+                            <button onclick="loadPdfForAnnotation()">📂 Open PDF File</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="status-bar">
+            <div class="status-left">
+                <span id="status-text">Ready</span>
+            </div>
+            <div class="status-right">
+                <span id="word-count-text">0 words</span>
+                <span id="char-count-text">0 characters</span>
+                <span id="page-count-text">0 pages</span>
+                <span>🦊 FoxxDocs</span>
+            </div>
+        </footer>
+    </div>
+
+    <input type="file" id="file-input" accept=".txt,.md,.rtf,.doc,.docx,.xls,.xlsx,.csv,.odt,.ods,.odp,.ppt,.pptx,.pdf,.html,.foxx" onchange="handleFileSelect(event)">
+
+    <script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/handsontable@14.0.0/dist/handsontable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';</script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://unpkg.com/docx@8.5.0/build/index.umd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+
+    <script>
+        let currentFormat = 'word';
+        let isModified = false;
+        let quillEditor = null;
+        let hot = null;
+        let currentFileName = 'Untitled Document';
+
+        const SUPPORTED_EXTENSIONS = [
+            { ext: '.txt', name: 'Text File', format: 'text' },
+            { ext: '.md', name: 'Markdown', format: 'text' },
+            { ext: '.rtf', name: 'Rich Text', format: 'text' },
+            { ext: '.doc', name: 'Word Doc', format: 'word' },
+            { ext: '.docx', name: 'Word Document', format: 'word' },
+            { ext: '.xls', name: 'Excel', format: 'excel' },
+            { ext: '.xlsx', name: 'Excel Workbook', format: 'excel' },
+            { ext: '.csv', name: 'CSV File', format: 'excel' },
+            { ext: '.odt', name: 'OpenDocument Text', format: 'word' },
+            { ext: '.ods', name: 'OpenDocument Spreadsheet', format: 'excel' },
+            { ext: '.odp', name: 'OpenDocument Presentation', format: 'ppt' },
+            { ext: '.ppt', name: 'PowerPoint', format: 'ppt' },
+            { ext: '.pptx', name: 'PowerPoint', format: 'ppt' },
+            { ext: '.pdf', name: 'PDF Document', format: 'pdf' },
+            { ext: '.html', name: 'HTML File', format: 'text' },
+            { ext: '.foxx', name: 'FoxxDocs File', format: 'auto' }
+        ];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            try {
+                initializeQuill();
+                initializeSpreadsheet();
+                setupEventListeners();
+                
+                setTimeout(() => {
+                    document.getElementById('loading-screen').classList.add('hidden');
+                    document.getElementById('welcome-modal').classList.remove('hidden');
+                    console.log('🦊 FoxxDocs ready!');
+                }, 1200);
+            } catch (error) {
+                console.error('Init error:', error);
+                document.getElementById('loading-screen').classList.add('hidden');
+                document.getElementById('welcome-modal').classList.remove('hidden');
+            }
+        });
+
+        function initializeQuill() {
+            quillEditor = new Quill('#quill-editor', {
+                theme: 'snow',
+                placeholder: 'Start typing your document... 🦊',
+                modules: {
+                    toolbar: [
+                        [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+                        ['bold', 'italic', 'underline', 'strike'],
+                        [{ 'color': [] }, { 'background': [] }],
+                        [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'indent': '-1' }, { 'indent': '+1' }],
+                        ['link', 'image', 'video'],
+                        ['blockquote', 'code-block'],
+                        [{ 'align': [] }],
+                        ['formula'],
+                        ['clean']
+                    ]
+                }
+            });
+
+            quillEditor.on('text-change', () => {
+                markAsModified();
+                updateCounts();
+            });
+            
+            // Add custom formula handler
+            const toolbar = quillEditor.getModule('toolbar');
+            toolbar.addHandler('formula', function() {
+                insertMathFormula();
+            });
+        }
+        
+        function insertMathFormula() {
+            const formula = prompt('Enter LaTeX math formula:\n\nExamples:\n  x = \\frac{-b \\pm \\sqrt{b^2-4ac}}{2a}\n  E = mc^2\n  \\int_0^\\infty e^{-x^2} dx = \\frac{\\sqrt{\\pi}}{2}');
+            
+            if (formula && formula.trim()) {
+                try {
+                    const span = document.createElement('span');
+                    katex.render(formula, span, { displayMode: true, throwOnError: false });
+                    const range = quillEditor.getSelection(true);
+                    quillEditor.insertEmbed(range.index, 'html', span.outerHTML);
+                    quillEditor.setSelection(range.index + 1);
+                    markAsModified();
+                } catch (e) {
+                    alert('Invalid formula. Please check your LaTeX syntax. 🦊');
+                }
+            }
+        }
+
+        function initializeSpreadsheet() {
+            const container = document.getElementById('spreadsheet-container');
+            
+            // Destroy existing instance if any
+            if (hot) {
+                hot.destroy();
+                hot = null;
+            }
+            
+            // Clear container
+            container.innerHTML = '';
+            
+            // Generate large grid - 100 rows, 26 columns (A-Z)
+            const rows = 100;
+            const cols = 26;
+            
+            // Create empty data without headers - Handsontable will auto-generate
+            const data = [];
+            for (let r = 0; r < rows; r++) {
+                const row = [];
+                for (let c = 0; c < cols; c++) {
+                    row.push('');
+                }
+                data.push(row);
+            }
+
+            hot = new Handsontable(container, {
+                data: data,
+                rowHeaders: (row) => (row + 1).toString(),
+                colHeaders: (col) => col < 26 ? String.fromCharCode(65 + col) : String.fromCharCode(65 + Math.floor(col / 26) - 1) + String.fromCharCode(65 + (col % 26)),
+                height: 700,
+                width: '100%',
+                minSpareRows: 10,
+                minSpareCols: 10,
+                licenseKey: 'non-commercial-and-evaluation',
+                contextMenu: true,
+                comments: true,
+                fixedRowsTop: 0,
+                fixedColumnsLeft: 0,
+                mergeCells: true,
+                autoColumnSize: true,
+                autoRowSize: true,
+                search: true,
+                afterChange: () => {
+                    markAsModified();
+                }
+            });
+        }
+
+        function setupEventListeners() {
+            document.addEventListener('keydown', (e) => {
+                if (e.ctrlKey || e.metaKey) {
+                    switch(e.key.toLowerCase()) {
+                        case 's': e.preventDefault(); saveFile(); break;
+                        case 'o': e.preventDefault(); openFile(); break;
+                        case 'n': e.preventDefault(); newDocument(); break;
+                        case 'b': e.preventDefault(); formatDoc('bold'); break;
+                        case 'i': e.preventDefault(); formatDoc('italic'); break;
+                        case 'u': e.preventDefault(); formatDoc('underline'); break;
+                    }
+                }
+            });
+
+            window.addEventListener('beforeunload', (e) => {
+                if (isModified) {
+                    e.preventDefault();
+                    e.returnValue = 'You have unsaved changes. 🦊';
+                }
+            });
+
+            document.getElementById('pdf-content').addEventListener('input', () => {
+                markAsModified();
+                updateCounts();
+            });
+        }
+
+        function createNewDoc() {
+            document.getElementById('welcome-modal').classList.add('hidden');
+            document.getElementById('app').classList.add('visible');
+            newDocument();
+        }
+
+        function openExistingFile() {
+            document.getElementById('welcome-modal').classList.add('hidden');
+            document.getElementById('app').classList.add('visible');
+            openFile();
+        }
+
+        function continueLastSession() {
+            document.getElementById('welcome-modal').classList.add('hidden');
+            document.getElementById('app').classList.add('visible');
+            loadFromLocalStorage();
+        }
+
+        function switchFormat(format) {
+            currentFormat = format;
+            
+            document.querySelectorAll('.format-tab').forEach(tab => {
+                tab.classList.toggle('active', tab.dataset.format === format);
+            });
+
+            document.querySelectorAll('.editor-container').forEach(editor => {
+                editor.classList.remove('active');
+            });
+            document.getElementById(`${format}-editor`).classList.add('active');
+            
+            setTimeout(updateCounts, 100);
+        }
+
+        function formatDoc(format, value) {
+            try {
+                switch(format) {
+                    case 'bold':
+                        quillEditor.format('bold', !quillEditor.getFormat().bold);
+                        break;
+                    case 'italic':
+                        quillEditor.format('italic', !quillEditor.getFormat().italic);
+                        break;
+                    case 'underline':
+                        quillEditor.format('underline', !quillEditor.getFormat().underline);
+                        break;
+                    case 'strike':
+                        quillEditor.format('strike', !quillEditor.getFormat().strike);
+                        break;
+                }
+            } catch (error) {
+                console.error('Format error:', error);
+            }
+        }
+
+        function markAsModified() {
+            isModified = true;
+            document.getElementById('unsaved-star').classList.add('visible');
+        }
+
+        function markAsSaved() {
+            isModified = false;
+            document.getElementById('unsaved-star').classList.remove('visible');
+        }
+
+        function renameDocument() {
+            const newName = prompt('Enter document name:', currentFileName);
+            if (newName && newName.trim()) {
+                currentFileName = newName.trim();
+                document.getElementById('doc-title-text').textContent = currentFileName;
+                markAsModified();
+            }
+        }
+
+        function updateCounts() {
+            let words = 0, chars = 0, pages = 0;
+            
+            if (currentFormat === 'word' && quillEditor) {
+                const text = quillEditor.getText();
+                chars = text.length;
+                words = text.trim().split(/\s+/).filter(w => w.length > 0).length;
+                pages = Math.max(1, Math.ceil(chars / 3000));
+            } else if (currentFormat === 'pdf') {
+                const text = document.getElementById('pdf-content').value;
+                chars = text.length;
+                words = text.trim().split(/\s+/).filter(w => w.length > 0).length;
+                pages = Math.max(1, Math.ceil(words / 500));
+            } else if (currentFormat === 'excel' && hot) {
+                const data = hot.getData().flat();
+                const filledCells = data.filter(c => c && c.toString().trim()).length;
+                words = filledCells;
+                chars = filledCells * 8;
+                pages = Math.max(1, Math.ceil(filledCells / 100));
+            }
+
+            document.getElementById('word-count-text').textContent = `${words} words`;
+            document.getElementById('char-count-text').textContent = `${chars} characters`;
+            document.getElementById('page-count-text').textContent = `${pages} page${pages !== 1 ? 's' : ''}`;
+        }
+
+        function newDocument() {
+            if (isModified && !confirm('You have unsaved changes. Create new document? 🦊')) {
+                return;
+            }
+            
+            currentFileName = 'Untitled Document';
+            document.getElementById('doc-title-text').textContent = currentFileName;
+            
+            if (quillEditor) quillEditor.setText('');
+            initializeSpreadsheet(); // Reset to large grid
+            document.getElementById('pdf-content').value = '';
+            
+            markAsSaved();
+            updateCounts();
+            console.log('🦊 New document');
+        }
+
+        function openFile() {
+            document.getElementById('file-input').click();
+        }
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            
+            reader.onload = async (e) => {
+                try {
+                    currentFileName = file.name.replace(/\.[^/.]+$/, '');
+                    document.getElementById('doc-title-text').textContent = currentFileName;
+
+                    if (file.name.endsWith('.foxx')) {
+                        // FoxxDocs native format
+                        const state = JSON.parse(e.target.result);
+                        currentFileName = state.filename || currentFileName;
+                        document.getElementById('doc-title-text').textContent = currentFileName;
+                        switchFormat(state.format || 'word');
+                        if (state.word && quillEditor) {
+                            try { quillEditor.setContents(JSON.parse(state.word)); } catch(e) {}
+                        }
+                        if (state.excel && hot) hot.loadData(state.excel);
+                        if (state.pdf) document.getElementById('pdf-content').value = state.pdf;
+                    }
+                    else if (file.name.match(/\.(xlsx|xls|csv)$/i)) {
+                        switchFormat('excel');
+                        const data = XLSX.read(e.target.result, { type: 'array' });
+                        const ws = data.Sheets[data.SheetNames[0]];
+                        const json = XLSX.utils.sheet_to_json(ws, { header: 1 });
+                        if (hot) hot.loadData(json);
+                    }
+                    else if (file.name.match(/\.(pdf)$/i)) {
+                        // Render PDF pages for annotation
+                        switchFormat('pdf');
+                        document.getElementById('status-text').textContent = 'Loading PDF... 🦊';
+                        
+                        const pdfData = new Uint8Array(e.target.result);
+                        
+                        try {
+                            await renderPdfForAnnotation(pdfData, currentFileName);
+                            document.getElementById('status-text').textContent = `PDF loaded! 🦊`;
+                            setTimeout(() => document.getElementById('status-text').textContent = 'Ready', 2000);
+                        } catch (pdfError) {
+                            console.error('PDF render error:', pdfError);
+                            document.getElementById('status-text').textContent = 'Error loading PDF';
+                            alert('Could not load PDF. 🦊\n\nError: ' + pdfError.message);
+                        }
+                    }
+                    else {
+                        // Text-based files
+                        switchFormat('word');
+                        if (quillEditor) quillEditor.setText(e.target.result);
+                    }
+
+                    markAsSaved();
+                    updateCounts();
+                    console.log('🦊 Opened:', file.name);
+                } catch (error) {
+                    console.error('File error:', error);
+                    alert('Could not open file. See console for details. 🦊');
+                }
+            };
+
+            // Read as array buffer for binary files, text for others
+            if (file.name.match(/\.(xlsx|xls|foxx|pdf)$/i)) {
+                reader.readAsArrayBuffer(file);
+            } else {
+                reader.readAsText(file);
+            }
+            
+            event.target.value = '';
+        }
+
+        function saveFile() {
+            try {
+                const state = {
+                    format: currentFormat,
+                    word: quillEditor ? JSON.stringify(quillEditor.getContents()) : '',
+                    excel: hot ? hot.getData() : [],
+                    pdf: document.getElementById('pdf-content').value,
+                    filename: currentFileName,
+                    timestamp: Date.now()
+                };
+                
+                const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+                downloadBlob(blob, `${currentFileName}.foxx`);
+
+                markAsSaved();
+                saveToLocalStorage();
+                document.getElementById('status-text').textContent = 'Saved! 🦊';
+                setTimeout(() => document.getElementById('status-text').textContent = 'Ready', 2000);
+            } catch (error) {
+                console.error('Save error:', error);
+                alert('Could not save. 🦊');
+            }
+        }
+
+        function downloadBlob(blob, filename) {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function exportToPDF() {
+            try {
+                const { jsPDF } = window.jspdf;
+                
+                // If in word mode, export from word editor with formatting
+                if (currentFormat === 'word' && quillEditor) {
+                    exportWordToPDF();
+                    return;
+                }
+                
+                // Otherwise use plain text PDF editor
+                const content = document.getElementById('pdf-content').value;
+                const doc = new jsPDF({
+                    orientation: 'portrait',
+                    unit: 'mm',
+                    format: 'a4'
+                });
+                
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(12);
+                
+                const pageWidth = 190;
+                const pageHeight = 280;
+                const margin = 15;
+                const lineHeight = 7;
+                
+                const lines = doc.splitTextToSize(content, pageWidth);
+                let y = margin;
+                
+                for (let i = 0; i < lines.length; i++) {
+                    if (y > pageHeight - margin) {
+                        doc.addPage();
+                        y = margin;
+                    }
+                    doc.text(lines[i], margin, y);
+                    y += lineHeight;
+                }
+                
+                doc.setFontSize(10);
+                doc.setTextColor(128);
+                doc.text('Created with FoxxDocs 🦊', margin, 290);
+                
+                doc.save(`${currentFileName}.pdf`);
+                
+                document.getElementById('status-text').textContent = 'PDF exported! 🦊';
+                setTimeout(() => document.getElementById('status-text').textContent = 'Ready', 2000);
+            } catch (error) {
+                console.error('PDF error:', error);
+                alert('Could not export PDF. 🦊\n\nError: ' + error.message);
+            }
+        }
+        
+        async function exportWordToPDF() {
+            try {
+                document.getElementById('status-text').textContent = 'Rendering PDF... 🦊';
+                
+                // Get the editor content
+                const editorContent = quillEditor.root.cloneNode(true);
+                
+                // Process math formulas - find $$ or $ delimiters and render with KaTeX
+                processMathInElement(editorContent);
+                
+                // Style the content for rendering
+                editorContent.style.padding = '20px';
+                editorContent.style.background = 'white';
+                editorContent.style.width = '800px';
+                editorContent.style.minHeight = '1100px';
+                editorContent.style.fontFamily = 'Roboto, Arial, sans-serif';
+                editorContent.style.color = '#202124';
+                editorContent.style.fontSize = '14px';
+                editorContent.style.lineHeight = '1.6';
+                
+                // Add to document temporarily for rendering
+                editorContent.style.position = 'absolute';
+                editorContent.style.left = '-9999px';
+                document.body.appendChild(editorContent);
+                
+                // Wait for KaTeX to render
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                // Render to canvas
+                const canvas = await html2canvas(editorContent, {
+                    scale: 2,
+                    useCORS: true,
+                    logging: false,
+                    backgroundColor: '#ffffff'
+                });
+                
+                // Remove temp element
+                document.body.removeChild(editorContent);
+                
+                // Create PDF
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF({
+                    orientation: 'portrait',
+                    unit: 'mm',
+                    format: 'a4'
+                });
+                
+                const imgWidth = 210; // A4 width in mm
+                const pageHeight = 297; // A4 height in mm
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                
+                let heightLeft = imgHeight;
+                let position = 0;
+                
+                // Add first page
+                pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+                
+                // Add more pages if needed
+                while (heightLeft > 0) {
+                    position = heightLeft - imgHeight;
+                    pdf.addPage();
+                    pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, position, imgWidth, imgHeight);
+                    heightLeft -= pageHeight;
+                }
+                
+                // Add footer
+                const pageCount = pdf.getNumberOfPages();
+                for (let i = 1; i <= pageCount; i++) {
+                    pdf.setPage(i);
+                    pdf.setFontSize(10);
+                    pdf.setTextColor(128);
+                    pdf.text(`FoxxDocs 🦊 - Page ${i} of ${pageCount}`, 15, 290);
+                }
+                
+                pdf.save(`${currentFileName}.pdf`);
+                
+                document.getElementById('status-text').textContent = 'PDF exported! 🦊';
+                setTimeout(() => document.getElementById('status-text').textContent = 'Ready', 2000);
+            } catch (error) {
+                console.error('PDF export error:', error);
+                document.getElementById('status-text').textContent = 'Error exporting PDF';
+                alert('Could not export PDF. Try using plain text mode. 🦊\n\nError: ' + error.message);
+            }
+        }
+        
+        function processMathInElement(element) {
+            // Find text nodes and process math formulas
+            const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, null, false);
+            const textNodes = [];
+            
+            while (walker.nextNode()) {
+                textNodes.push(walker.currentNode);
+            }
+            
+            for (const textNode of textNodes) {
+                const text = textNode.textContent;
+                
+                // Check for display math $$...$$
+                if (text.includes('$$')) {
+                    const parts = text.split(/(\$\$[\s\S]*?\$\$)/g);
+                    const fragment = document.createDocumentFragment();
+                    
+                    for (const part of parts) {
+                        if (part.startsWith('$$') && part.endsWith('$$')) {
+                            const formula = part.slice(2, -2).trim();
+                            try {
+                                const span = document.createElement('span');
+                                katex.render(formula, span, { displayMode: true, throwOnError: false });
+                                fragment.appendChild(span);
+                            } catch (e) {
+                                fragment.appendChild(document.createTextNode(part));
+                            }
+                        } else if (part.includes('$')) {
+                            // Inline math $...$
+                            const inlineParts = part.split(/(\$[^$]+\$)/g);
+                            for (const inlinePart of inlineParts) {
+                                if (inlinePart.startsWith('$') && inlinePart.endsWith('$')) {
+                                    const formula = inlinePart.slice(1, -1).trim();
+                                    try {
+                                        const span = document.createElement('span');
+                                        katex.render(formula, span, { displayMode: false, throwOnError: false });
+                                        fragment.appendChild(span);
+                                    } catch (e) {
+                                        fragment.appendChild(document.createTextNode(inlinePart));
+                                    }
+                                } else {
+                                    fragment.appendChild(document.createTextNode(inlinePart));
+                                }
+                            }
+                        } else {
+                            fragment.appendChild(document.createTextNode(part));
+                        }
+                    }
+                    
+                    textNode.parentNode.replaceChild(fragment, textNode);
+                }
+                // Check for inline math only
+                else if (text.includes('$')) {
+                    const parts = text.split(/(\$[^$]+\$)/g);
+                    const fragment = document.createDocumentFragment();
+                    
+                    for (const part of parts) {
+                        if (part.startsWith('$') && part.endsWith('$')) {
+                            const formula = part.slice(1, -1).trim();
+                            try {
+                                const span = document.createElement('span');
+                                katex.render(formula, span, { displayMode: false, throwOnError: false });
+                                fragment.appendChild(span);
+                            } catch (e) {
+                                fragment.appendChild(document.createTextNode(part));
+                            }
+                        } else {
+                            fragment.appendChild(document.createTextNode(part));
+                        }
+                    }
+                    
+                    textNode.parentNode.replaceChild(fragment, textNode);
+                }
+            }
+        }
+
+        function downloadAsDOCX() {
+            try {
+                if (!quillEditor) {
+                    alert('No document to export! 🦊');
+                    return;
+                }
+                
+                const delta = quillEditor.getContents();
+                
+                // Convert Quill delta to docx paragraphs with full formatting
+                const paragraphs = [];
+                let currentParagraph = [];
+                let currentFormat = {};
+                
+                // Process each operation
+                for (let i = 0; i < delta.ops.length; i++) {
+                    const op = delta.ops[i];
+                    
+                    if (!op.insert) continue;
+                    
+                    // Handle line breaks - create new paragraph
+                    if (typeof op.insert === 'string' && (op.insert.includes('\n') || op.insert === '\n')) {
+                        const lines = op.insert.split('\n');
+                        
+                        for (let j = 0; j < lines.length; j++) {
+                            if (lines[j] || j === lines.length - 1) {
+                                if (currentParagraph.length > 0 || lines[j]) {
+                                    const textRun = new docx.TextRun({
+                                        text: lines[j] || ' ',
+                                        bold: op.attributes?.bold || currentFormat.bold,
+                                        italic: op.attributes?.italic || currentFormat.italic,
+                                        underline: (op.attributes?.underline || currentFormat.underline) ? {} : undefined,
+                                        strike: op.attributes?.strike || currentFormat.strike,
+                                        color: op.attributes?.color || currentFormat.color,
+                                        highlight: op.attributes?.background ? { color: mapBackgroundColor(op.attributes.background) } : undefined
+                                    });
+                                    currentParagraph.push(textRun);
+                                }
+                                
+                                // Create paragraph with heading if needed
+                                const headingLevel = op.attributes?.header || currentFormat.header;
+                                paragraphs.push(new docx.Paragraph({
+                                    children: currentParagraph,
+                                    heading: headingLevel ? docx.HeadingLevel[`HEADING_${headingLevel}`] : undefined,
+                                    spacing: { after: 200 }
+                                }));
+                                currentParagraph = [];
+                            }
+                        }
+                        currentFormat = op.attributes ? { ...op.attributes } : {};
+                        continue;
+                    }
+                    
+                    if (typeof op.insert === 'string') {
+                        // Update current format
+                        if (op.attributes) {
+                            currentFormat = { ...currentFormat, ...op.attributes };
+                        }
+                        
+                        const textRun = new docx.TextRun({
+                            text: op.insert,
+                            bold: op.attributes?.bold || currentFormat.bold,
+                            italic: op.attributes?.italic || currentFormat.italic,
+                            underline: (op.attributes?.underline || currentFormat.underline) ? {} : undefined,
+                            strike: op.attributes?.strike || currentFormat.strike,
+                            color: op.attributes?.color || currentFormat.color,
+                            highlight: (op.attributes?.background || currentFormat.background) ? { color: mapBackgroundColor(op.attributes?.background || currentFormat.background) } : undefined,
+                            font: currentFormat.font ? { name: currentFormat.font } : undefined,
+                            size: currentFormat.size ? { val: currentFormat.size } : undefined
+                        });
+                        currentParagraph.push(textRun);
+                    }
+                    else if (typeof op.insert === 'object' && op.insert.image) {
+                        // Handle images - skip for now (complex)
+                        currentParagraph.push(new docx.TextRun({ text: '[Image]', italic: true }));
+                    }
+                }
+                
+                // Add remaining paragraph
+                if (currentParagraph.length > 0) {
+                    paragraphs.push(new docx.Paragraph({
+                        children: currentParagraph,
+                        spacing: { after: 200 }
+                    }));
+                }
+                
+                // Handle lists if present
+                const listParagraphs = [];
+                let inList = false;
+                let listItems = [];
+                
+                for (const p of paragraphs) {
+                    const text = p.children?.map(c => c.text).join('') || '';
+                    if (text.startsWith('• ') || text.match(/^\d+\.\s/)) {
+                        if (!inList) {
+                            inList = true;
+                        }
+                        listItems.push(text.replace(/^[•\d.]+\s*/, ''));
+                    } else {
+                        if (inList && listItems.length > 0) {
+                            listParagraphs.push(new docx.Paragraph({
+                                children: listItems.map(item => new docx.TextRun({ text: item + '\n' })),
+                                bullet: { level: 0 }
+                            }));
+                            listItems = [];
+                        }
+                        inList = false;
+                    }
+                }
+                
+                // Combine regular paragraphs with list paragraphs
+                const finalParagraphs = [...paragraphs];
+                
+                // If no paragraphs, add empty one
+                if (finalParagraphs.length === 0) {
+                    finalParagraphs.push(new docx.Paragraph({
+                        children: [new docx.TextRun({ text: '' })]
+                    }));
+                }
+
+                const doc = new docx.Document({
+                    sections: [{
+                        properties: {},
+                        children: finalParagraphs
+                    }]
+                });
+
+                docx.Packer.toBlob(doc).then(blob => {
+                    downloadBlob(blob, `${currentFileName}.docx`);
+                    document.getElementById('status-text').textContent = 'DOCX exported! 🦊';
+                    setTimeout(() => document.getElementById('status-text').textContent = 'Ready', 2000);
+                });
+            } catch (error) {
+                console.error('DOCX error:', error);
+                // Fallback: export as HTML
+                const html = quillEditor.root.innerHTML;
+                const blob = new Blob([html], { type: 'text/html' });
+                downloadBlob(blob, `${currentFileName}.html`);
+                alert('DOCX export failed, exported as HTML instead. 🦊');
+            }
+        }
+        
+        function mapBackgroundColor(color) {
+            if (!color) return undefined;
+            // Map common colors to docx highlight colors
+            const colorMap = {
+                '#ffff00': 'yellow',
+                '#ff0': 'yellow',
+                '#00ff00': 'green',
+                '#0f0': 'green',
+                '#00ffff': 'cyan',
+                '#0ff': 'cyan',
+                '#ff00ff': 'magenta',
+                '#f0f': 'magenta',
+                '#ff0000': 'red',
+                '#f00': 'red',
+                '#0000ff': 'blue',
+                '#00f': 'blue'
+            };
+            return colorMap[color.toLowerCase()] || 'yellow';
+        }
+
+        function downloadAsXLSX() {
+            try {
+                if (!hot) {
+                    alert('No spreadsheet to export! 🦊');
+                    return;
+                }
+                
+                const data = hot.getData();
+                const ws = XLSX.utils.aoa_to_sheet(data);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+                XLSX.writeFile(wb, `${currentFileName}.xlsx`);
+                
+                document.getElementById('status-text').textContent = 'XLSX exported! 🦊';
+                setTimeout(() => document.getElementById('status-text').textContent = 'Ready', 2000);
+            } catch (error) {
+                console.error('XLSX error:', error);
+                alert('Could not export XLSX. 🦊');
+            }
+        }
+
+        function showFormatMenu() {
+            const menu = document.createElement('div');
+            menu.style.cssText = `
+                position: fixed;
+                top: 60px;
+                right: 16px;
+                background: white;
+                border-radius: 8px;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+                padding: 8px 0;
+                z-index: 1000;
+                min-width: 200px;
+            `;
+            
+            const options = [
+                { label: '📄 Export as PDF', action: exportToPDF },
+                { label: '📃 Export as DOCX', action: downloadAsDOCX },
+                { label: '📊 Export as XLSX', action: downloadAsXLSX },
+                { label: '📝 Export as TXT', action: () => {
+                    const content = quillEditor ? quillEditor.getText() : document.getElementById('pdf-content').value;
+                    downloadBlob(new Blob([content], { type: 'text/plain' }), `${currentFileName}.txt`);
+                }},
+                { label: '📦 Export as HTML', action: () => {
+                    const html = quillEditor ? quillEditor.root.innerHTML : `<pre>${document.getElementById('pdf-content').value}</pre>`;
+                    downloadBlob(new Blob([html], { type: 'text/html' }), `${currentFileName}.html`);
+                }},
+                { label: '💾 Export as CSV', action: () => {
+                    if (hot) {
+                        const data = hot.getData();
+                        const csv = data.map(row => row.join(',')).join('\n');
+                        downloadBlob(new Blob([csv], { type: 'text/csv' }), `${currentFileName}.csv`);
+                    }
+                }}
+            ];
+            
+            options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.textContent = opt.label;
+                btn.style.cssText = `
+                    display: block;
+                    width: 100%;
+                    padding: 12px 20px;
+                    border: none;
+                    background: transparent;
+                    text-align: left;
+                    cursor: pointer;
+                    font-size: 14px;
+                `;
+                btn.onclick = () => {
+                    opt.action();
+                    document.body.removeChild(menu);
+                };
+                btn.onmouseover = () => btn.style.background = '#f5f5f5';
+                btn.onmouseout = () => btn.style.background = 'transparent';
+                menu.appendChild(btn);
+            });
+            
+            document.body.appendChild(menu);
+            
+            setTimeout(() => {
+                document.addEventListener('click', function closeMenu() {
+                    if (document.body.contains(menu)) {
+                        document.body.removeChild(menu);
+                    }
+                    document.removeEventListener('click', closeMenu);
+                });
+            }, 100);
+        }
+
+        function saveToLocalStorage() {
+            try {
+                const state = {
+                    format: currentFormat,
+                    word: quillEditor ? JSON.stringify(quillEditor.getContents()) : '',
+                    excel: hot ? hot.getData() : [],
+                    pdf: document.getElementById('pdf-content').value,
+                    filename: currentFileName,
+                    timestamp: Date.now()
+                };
+                localStorage.setItem('foxxdocs_state', JSON.stringify(state));
+            } catch (error) {
+                console.error('Save error:', error);
+            }
+        }
+
+        function loadFromLocalStorage() {
+            try {
+                const saved = localStorage.getItem('foxxdocs_state');
+                if (saved) {
+                    const state = JSON.parse(saved);
+                    
+                    currentFileName = state.filename || 'Untitled Document';
+                    document.getElementById('doc-title-text').textContent = currentFileName;
+                    
+                    switchFormat(state.format || 'word');
+                    
+                    if (state.word && quillEditor) {
+                        try { quillEditor.setContents(JSON.parse(state.word)); } catch(e) {}
+                    }
+                    
+                    if (state.excel && hot) hot.loadData(state.excel);
+                    if (state.pdf) document.getElementById('pdf-content').value = state.pdf;
+                    
+                    updateCounts();
+                    console.log('🦊 Session restored');
+                } else {
+                    switchFormat('word');
+                }
+            } catch (error) {
+                console.error('Load error:', error);
+                switchFormat('word');
+            }
+        }
+
+        setInterval(() => {
+            if (isModified && document.getElementById('app').classList.contains('visible')) {
+                saveToLocalStorage();
+            }
+        }, 30000);
+
+        // ========== PDF Annotation System ==========
+        
+        let pdfDoc = null;
+        let pdfPages = []; // Array of {canvas, annotationCanvas, ctx, annotationCtx, annotations}
+        let currentPdfPage = 0;
+        let currentPdfTool = 'select';
+        let isDrawing = false;
+        let lastX = 0;
+        let lastY = 0;
+        let pdfUndoStack = [];
+        let pdfRedoStack = [];
+
+        function loadPdfForAnnotation() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.pdf';
+            input.onchange = async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = async (ev) => {
+                    try {
+                        currentFileName = file.name.replace(/\.[^/.]+$/, '');
+                        document.getElementById('doc-title-text').textContent = currentFileName;
+                        switchFormat('pdf');
+                        document.getElementById('status-text').textContent = 'Loading PDF... 🦊';
+                        
+                        const pdfData = new Uint8Array(ev.target.result);
+                        await renderPdfForAnnotation(pdfData, currentFileName);
+                        
+                        document.getElementById('status-text').textContent = 'PDF loaded! 🦊';
+                        setTimeout(() => document.getElementById('status-text').textContent = 'Ready', 2000);
+                    } catch (error) {
+                        console.error('PDF load error:', error);
+                        alert('Could not load PDF. 🦊');
+                    }
+                };
+                reader.readAsArrayBuffer(file);
+            };
+            input.click();
+        }
+
+        async function renderPdfForAnnotation(pdfData, filename) {
+            const container = document.getElementById('pdf-canvas-container');
+            container.innerHTML = '';
+            
+            pdfDoc = await pdfjsLib.getDocument({ data: pdfData }).promise;
+            pdfPages = [];
+            pdfUndoStack = [];
+            pdfRedoStack = [];
+            
+            document.getElementById('pdf-total-pages').textContent = pdfDoc.numPages;
+            
+            for (let i = 1; i <= pdfDoc.numPages; i++) {
+                const page = await pdfDoc.getPage(i);
+                const scale = 1.5;
+                const viewport = page.getViewport({ scale });
+                
+                // Create wrapper
+                const wrapper = document.createElement('div');
+                wrapper.className = 'pdf-page-wrapper';
+                wrapper.style.width = viewport.width + 'px';
+                wrapper.style.height = viewport.height + 'px';
+                wrapper.dataset.pageIndex = i - 1;
+                
+                // PDF canvas (background)
+                const pdfCanvas = document.createElement('canvas');
+                pdfCanvas.className = 'pdf-canvas';
+                pdfCanvas.width = viewport.width;
+                pdfCanvas.height = viewport.height;
+                
+                // Annotation canvas (foreground)
+                const annotationCanvas = document.createElement('canvas');
+                annotationCanvas.className = 'annotation-canvas';
+                annotationCanvas.width = viewport.width;
+                annotationCanvas.height = viewport.height;
+                
+                wrapper.appendChild(pdfCanvas);
+                wrapper.appendChild(annotationCanvas);
+                container.appendChild(wrapper);
+                
+                // Render PDF page
+                const pdfCtx = pdfCanvas.getContext('2d');
+                await page.render({ canvasContext: pdfCtx, viewport }).promise;
+                
+                // Get annotation context
+                const annotationCtx = annotationCanvas.getContext('2d');
+                
+                pdfPages.push({
+                    wrapper,
+                    pdfCanvas,
+                    annotationCanvas,
+                    pdfCtx,
+                    annotationCtx,
+                    viewport,
+                    scale,
+                    annotations: []
+                });
+            }
+            
+            showPdfPage(0);
+            currentFileName = filename;
+        }
+
+        function showPdfPage(index) {
+            if (index < 0 || index >= pdfPages.length) return;
+            
+            currentPdfPage = index;
+            document.getElementById('pdf-page-num').value = index + 1;
+            
+            pdfPages.forEach((page, i) => {
+                page.wrapper.style.display = i === index ? 'block' : 'none';
+            });
+        }
+
+        function prevPdfPage() {
+            if (currentPdfPage > 0) showPdfPage(currentPdfPage - 1);
+        }
+
+        function nextPdfPage() {
+            if (currentPdfPage < pdfPages.length - 1) showPdfPage(currentPdfPage + 1);
+        }
+
+        document.getElementById('pdf-page-num').addEventListener('change', (e) => {
+            const page = parseInt(e.target.value) - 1;
+            if (page >= 0 && page < pdfPages.length) showPdfPage(page);
+        });
+
+        document.getElementById('pdf-size').addEventListener('input', (e) => {
+            document.getElementById('pdf-size-label').textContent = e.target.value + 'px';
+        });
+
+        function setPdfTool(tool) {
+            currentPdfTool = tool;
+            
+            document.querySelectorAll('.pdf-tool-btn').forEach(btn => btn.classList.remove('active'));
+            const toolBtn = document.getElementById('tool-' + tool);
+            if (toolBtn) toolBtn.classList.add('active');
+            
+            // Show/hide appropriate color picker
+            document.getElementById('pdf-color').style.display = (tool === 'pen' || tool === 'text') ? 'block' : 'none';
+            document.getElementById('pdf-highlight-color').style.display = tool === 'highlight' ? 'block' : 'none';
+            
+            // Update cursor
+            if (pdfPages[currentPdfPage]) {
+                const canvas = pdfPages[currentPdfPage].annotationCanvas;
+                canvas.style.cursor = tool === 'select' ? 'default' : (tool === 'text' ? 'text' : 'crosshair');
+            }
+        }
+
+        function addPdfPage() {
+            const container = document.getElementById('pdf-canvas-container');
+            
+            const width = 595 * 1.5; // A4 at 72dpi * 1.5 scale
+            const height = 842 * 1.5;
+            
+            const wrapper = document.createElement('div');
+            wrapper.className = 'pdf-page-wrapper';
+            wrapper.style.width = width + 'px';
+            wrapper.style.height = height + 'px';
+            wrapper.dataset.pageIndex = pdfPages.length;
+            
+            // White background for new page
+            const pdfCanvas = document.createElement('canvas');
+            pdfCanvas.className = 'pdf-canvas';
+            pdfCanvas.width = width;
+            pdfCanvas.height = height;
+            const pdfCtx = pdfCanvas.getContext('2d');
+            pdfCtx.fillStyle = 'white';
+            pdfCtx.fillRect(0, 0, width, height);
+            
+            const annotationCanvas = document.createElement('canvas');
+            annotationCanvas.className = 'annotation-canvas';
+            annotationCanvas.width = width;
+            annotationCanvas.height = height;
+            
+            wrapper.appendChild(pdfCanvas);
+            wrapper.appendChild(annotationCanvas);
+            container.appendChild(wrapper);
+            
+            const annotationCtx = annotationCanvas.getContext('2d');
+            
+            pdfPages.push({
+                wrapper,
+                pdfCanvas,
+                annotationCanvas,
+                pdfCtx,
+                annotationCtx,
+                viewport: { width, height },
+                scale: 1.5,
+                annotations: []
+            });
+            
+            document.getElementById('pdf-total-pages').textContent = pdfPages.length;
+            showPdfPage(pdfPages.length - 1);
+            markAsModified();
+        }
+
+        // Drawing handlers
+        function setupCanvasHandlers() {
+            pdfPages.forEach((page, index) => {
+                const canvas = page.annotationCanvas;
+                
+                canvas.addEventListener('mousedown', (e) => startDrawing(e, index));
+                canvas.addEventListener('mousemove', (e) => draw(e, index));
+                canvas.addEventListener('mouseup', () => stopDrawing());
+                canvas.addEventListener('mouseout', () => stopDrawing());
+                
+                // Touch support
+                canvas.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    const touch = e.touches[0];
+                    const rect = canvas.getBoundingClientRect();
+                    startDrawing({ clientX: touch.clientX, clientY: touch.clientY }, index);
+                });
+                canvas.addEventListener('touchmove', (e) => {
+                    e.preventDefault();
+                    const touch = e.touches[0];
+                    draw({ clientX: touch.clientX, clientY: touch.clientY }, index);
+                });
+                canvas.addEventListener('touchend', () => stopDrawing());
+            });
+        }
+
+        function startDrawing(e, pageIndex) {
+            if (currentPdfTool === 'select') return;
+            
+            const page = pdfPages[pageIndex];
+            const rect = page.annotationCanvas.getBoundingClientRect();
+            lastX = e.clientX - rect.left;
+            lastY = e.clientY - rect.top;
+            
+            if (currentPdfTool === 'text') {
+                addTextAnnotation(page, lastX, lastY);
+                return;
+            }
+            
+            if (currentPdfTool === 'eraser') {
+                eraseAt(page, lastX, lastY);
+                return;
+            }
+            
+            isDrawing = true;
+            
+            // Save state for undo
+            savePdfState();
+        }
+
+        function draw(e, pageIndex) {
+            if (!isDrawing) return;
+            
+            const page = pdfPages[pageIndex];
+            const rect = page.annotationCanvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            const ctx = page.annotationCtx;
+            const color = document.getElementById('pdf-color').value;
+            const size = parseInt(document.getElementById('pdf-size').value);
+            
+            ctx.lineWidth = size;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            
+            if (currentPdfTool === 'pen') {
+                ctx.strokeStyle = color;
+                ctx.globalAlpha = 1;
+                ctx.beginPath();
+                ctx.moveTo(lastX, lastY);
+                ctx.lineTo(x, y);
+                ctx.stroke();
+            } else if (currentPdfTool === 'highlight') {
+                const highlightColor = document.getElementById('pdf-highlight-color').value;
+                ctx.strokeStyle = highlightColor;
+                ctx.globalAlpha = 0.4;
+                ctx.lineWidth = size * 8;
+                ctx.beginPath();
+                ctx.moveTo(lastX, lastY);
+                ctx.lineTo(x, y);
+                ctx.stroke();
+                ctx.globalAlpha = 1;
+            }
+            
+            lastX = x;
+            lastY = y;
+        }
+
+        function stopDrawing() {
+            isDrawing = false;
+        }
+
+        function addTextAnnotation(page, x, y) {
+            const text = prompt('Enter text:');
+            if (!text) return;
+            
+            savePdfState();
+            
+            const color = document.getElementById('pdf-color').value;
+            const size = parseInt(document.getElementById('pdf-size').value) * 6;
+            
+            page.annotationCtx.font = `${size}px Arial`;
+            page.annotationCtx.fillStyle = color;
+            page.annotationCtx.fillText(text, x, y);
+            
+            page.annotations.push({ type: 'text', x, y, text, color, size });
+            markAsModified();
+        }
+
+        function eraseAt(page, x, y) {
+            savePdfState();
+            
+            const size = parseInt(document.getElementById('pdf-size').value) * 5;
+            page.annotationCtx.clearRect(x - size/2, y - size/2, size, size);
+        }
+
+        function savePdfState() {
+            if (!pdfPages[currentPdfPage]) return;
+            
+            const page = pdfPages[currentPdfPage];
+            const imageData = page.annotationCtx.getImageData(0, 0, page.annotationCanvas.width, page.annotationCanvas.height);
+            pdfUndoStack.push({
+                pageIndex: currentPdfPage,
+                imageData
+            });
+            pdfRedoStack = [];
+        }
+
+        function undoPdfAnnotation() {
+            if (pdfUndoStack.length === 0) return;
+            
+            const page = pdfPages[currentPdfPage];
+            const currentState = page.annotationCtx.getImageData(0, 0, page.annotationCanvas.width, page.annotationCanvas.height);
+            pdfRedoStack.push({
+                pageIndex: currentPdfPage,
+                imageData: currentState
+            });
+            
+            const state = pdfUndoStack.pop();
+            showPdfPage(state.pageIndex);
+            pdfPages[state.pageIndex].annotationCtx.putImageData(state.imageData, 0, 0);
+        }
+
+        function redoPdfAnnotation() {
+            if (pdfRedoStack.length === 0) return;
+            
+            const page = pdfPages[currentPdfPage];
+            const currentState = page.annotationCtx.getImageData(0, 0, page.annotationCanvas.width, page.annotationCanvas.height);
+            pdfUndoStack.push({
+                pageIndex: currentPdfPage,
+                imageData: currentState
+            });
+            
+            const state = pdfRedoStack.pop();
+            showPdfPage(state.pageIndex);
+            pdfPages[state.pageIndex].annotationCtx.putImageData(state.imageData, 0, 0);
+        }
+
+        function clearPdfPage() {
+            if (!pdfPages[currentPdfPage]) return;
+            if (!confirm('Clear all annotations on this page? 🦊')) return;
+            
+            savePdfState();
+            const page = pdfPages[currentPdfPage];
+            page.annotationCtx.clearRect(0, 0, page.annotationCanvas.width, page.annotationCanvas.height);
+            page.annotations = [];
+        }
+
+        function exportAnnotatedPdf() {
+            if (pdfPages.length === 0) {
+                alert('No PDF to export! 🦊');
+                return;
+            }
+            
+            document.getElementById('status-text').textContent = 'Exporting PDF... 🦊';
+            
+            try {
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF({
+                    orientation: 'portrait',
+                    unit: 'pt',
+                    format: 'a4'
+                });
+                
+                const pageWidth = 595;
+                const pageHeight = 842;
+                
+                pdfPages.forEach((page, index) => {
+                    if (index > 0) pdf.addPage();
+                    
+                    // Combine PDF canvas and annotation canvas
+                    const combinedCanvas = document.createElement('canvas');
+                    combinedCanvas.width = page.pdfCanvas.width;
+                    combinedCanvas.height = page.pdfCanvas.height;
+                    const combinedCtx = combinedCanvas.getContext('2d');
+                    
+                    // Draw PDF
+                    combinedCtx.drawImage(page.pdfCanvas, 0, 0);
+                    // Draw annotations
+                    combinedCtx.drawImage(page.annotationCanvas, 0, 0);
+                    
+                    // Scale down to A4
+                    const imgData = combinedCanvas.toDataURL('image/jpeg', 0.95);
+                    
+                    const scale = Math.min(pageWidth / combinedCanvas.width, pageHeight / combinedCanvas.height);
+                    const imgWidth = combinedCanvas.width * scale;
+                    const imgHeight = combinedCanvas.height * scale;
+                    const x = (pageWidth - imgWidth) / 2;
+                    const y = (pageHeight - imgHeight) / 2;
+                    
+                    pdf.addImage(imgData, 'JPEG', x, y, imgWidth, imgHeight);
+                });
+                
+                pdf.save(`${currentFileName || 'annotated'}.pdf`);
+                
+                document.getElementById('status-text').textContent = 'PDF exported! 🦊';
+                setTimeout(() => document.getElementById('status-text').textContent = 'Ready', 2000);
+            } catch (error) {
+                console.error('PDF export error:', error);
+                alert('Could not export PDF. 🦊\n\nError: ' + error.message);
+            }
+        }
+
+        // Setup canvas handlers when pages are rendered
+        const originalRenderPdf = renderPdfForAnnotation;
+        renderPdfForAnnotation = async function(...args) {
+            await originalRenderPdf.apply(this, args);
+            setupCanvasHandlers();
+        };
+
+        // Export from word to PDF should also work
+        const originalExportToPDF = exportToPDF;
+        exportToPDF = function() {
+            if (pdfPages.length > 0) {
+                exportAnnotatedPdf();
+            } else {
+                originalExportToPDF.apply(this, arguments);
+            }
+        };
+    </script>
+</body>
+</html>
