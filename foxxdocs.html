@@ -966,12 +966,14 @@
         function createNewDoc() {
             document.getElementById('welcome-modal').classList.add('hidden');
             document.getElementById('app').classList.add('visible');
+            switchFormat('word');
             newDocument();
         }
 
         function openExistingFile() {
             document.getElementById('welcome-modal').classList.add('hidden');
             document.getElementById('app').classList.add('visible');
+            switchFormat('word');
             openFile();
         }
 
