@@ -7,350 +7,682 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🦊</text></svg>">
     <style>
         :root {
-            --bg-color: #0d1117;
-            --sidebar-bg: #161b22;
-            --text-color: #c9d1d9;
-            --accent-color: #ff8c00;
-            --accent-hover: #ff9f2e;
-            --border-color: #3e2723;
-            --input-bg: #0d1117;
-            --mono-font: 'Fira Code', 'Courier New', monospace;
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-tertiary: #1a1a25;
+            --bg-card: #16161f;
+            --text-primary: #f0f0f5;
+            --text-secondary: #a0a0b0;
+            --text-muted: #606070;
+            --accent: #ff6b35;
+            --accent-glow: rgba(255, 107, 53, 0.3);
+            --accent-secondary: #ff9f35;
+            --border: #2a2a35;
+            --border-light: #3a3a45;
+            --success: #35ff6b;
+            --error: #ff3555;
+            --mono-font: 'SF Mono', 'Fira Code', 'Monaco', monospace;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
+        html { font-size: 16px; }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro", "Segoe UI", sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(ellipse 80% 50% at 20% 20%, rgba(255, 107, 53, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse 60% 40% at 80% 80%, rgba(255, 159, 53, 0.05) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .app-container {
             display: flex;
-            height: 100vh;
-            overflow: hidden;
+            min-height: 100vh;
         }
 
         .sidebar {
-            width: 500px;
-            background-color: var(--sidebar-bg);
-            border-right: 1px solid var(--border-color);
-            padding: 20px;
-            overflow-y: auto;
+            width: 420px;
+            min-width: 420px;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border);
+            padding: 24px;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 20px;
+            overflow-y: auto;
+            max-height: 100vh;
         }
 
         .main {
             flex: 1;
             display: flex;
             flex-direction: column;
-            padding: 20px;
+            padding: 24px 32px;
             overflow-y: auto;
+            max-height: 100vh;
         }
 
-        h1 {
-            font-size: 1.5rem;
-            color: var(--accent-color);
-            margin-bottom: 12px;
-            border-bottom: 2px solid var(--accent-color);
-            padding-bottom: 10px;
+        .logo {
             display: flex;
             align-items: center;
-            gap: 10px;
-            font-weight: 800;
+            gap: 12px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
         }
 
-        h2 {
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            box-shadow: 0 4px 20px var(--accent-glow);
+        }
+
+        .logo-text {
+            font-size: 1.3rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .logo-sub {
             font-size: 0.7rem;
+            color: var(--text-muted);
             text-transform: uppercase;
-            letter-spacing: 0.08rem;
-            color: #ffb74d;
-            margin-bottom: 6px;
-            border-left: 3px solid var(--accent-color);
-            padding-left: 8px;
+            letter-spacing: 0.1em;
         }
 
-        .field-group { margin-bottom: 8px; }
+        .type-selector {
+            display: flex;
+            gap: 8px;
+            background: var(--bg-tertiary);
+            padding: 6px;
+            border-radius: 12px;
+        }
+
+        .type-btn {
+            flex: 1;
+            padding: 12px 8px;
+            background: transparent;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            font-weight: 500;
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .type-btn:hover {
+            color: var(--text-primary);
+            background: var(--bg-card);
+        }
+
+        .type-btn.active {
+            background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+            color: white;
+            box-shadow: 0 4px 15px var(--accent-glow);
+        }
+
+        .type-btn .icon { font-size: 1.3rem; }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 18px;
+            transition: var(--transition);
+        }
+
+        .card:hover {
+            border-color: var(--border-light);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+        }
+
+        .card-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-title::before {
+            content: '';
+            width: 3px;
+            height: 14px;
+            background: linear-gradient(180deg, var(--accent), var(--accent-secondary));
+            border-radius: 2px;
+        }
+
+        .quick-actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .quick-btn {
+            padding: 4px 10px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-secondary);
+            font-size: 0.65rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .quick-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .field-group {
+            margin-bottom: 14px;
+        }
+
+        .field-group:last-child { margin-bottom: 0; }
 
         label {
             display: block;
             font-size: 0.75rem;
-            margin-bottom: 3px;
-            font-weight: 600;
-            color: #d1d5db;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
         }
 
         input[type="text"], textarea, select {
             width: 100%;
-            background-color: var(--input-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            color: var(--text-color);
-            padding: 8px 10px;
-            font-size: 0.75rem;
-            font-family: var(--mono-font);
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            padding: 12px 14px;
+            font-size: 0.8rem;
+            font-family: inherit;
+            transition: var(--transition);
+            resize: vertical;
         }
 
-        textarea { resize: vertical; min-height: 45px; }
+        textarea {
+            min-height: 60px;
+            line-height: 1.5;
+        }
 
         input:focus, textarea:focus, select:focus {
             outline: none;
-            border-color: var(--accent-color);
-            box-shadow: 0 0 0 3px rgba(255, 140, 0, 0.2);
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
         }
 
-        .type-selector {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr 1fr;
-            gap: 8px;
-            margin-bottom: 12px;
+        input::placeholder, textarea::placeholder {
+            color: var(--text-muted);
         }
 
-        .type-btn {
-            background-color: var(--input-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 10px 6px;
+        .preset-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+        .preset-chip {
+            padding: 5px 10px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            color: var(--text-secondary);
+            font-size: 0.65rem;
             cursor: pointer;
-            text-align: center;
-            transition: all 0.2s;
-            color: var(--text-color);
+            transition: var(--transition);
         }
 
-        .type-btn:hover { border-color: var(--accent-color); }
-
-        .type-btn.active {
-            background-color: #2c1e14;
-            border-color: var(--accent-color);
-            color: var(--accent-color);
+        .preset-chip:hover {
+            border-color: var(--accent);
+            color: var(--accent);
         }
-
-        .type-btn .icon { font-size: 1.2rem; display: block; margin-bottom: 3px; }
-        .type-btn .label { font-size: 0.65rem; font-weight: 600; }
 
         .preview-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 12px;
+            margin-bottom: 20px;
         }
 
-        #prompt-output {
-            flex: 1;
-            background-color: var(--sidebar-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 18px;
-            font-family: var(--mono-font);
-            font-size: 0.75rem;
-            line-height: 1.5;
-            white-space: pre-wrap;
-            overflow-y: auto;
-            color: #e6edf3;
+        .preview-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .preview-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
         }
 
         .btn {
-            background-color: #d35400;
-            color: white;
+            padding: 10px 18px;
             border: none;
-            border-radius: 6px;
-            padding: 8px 16px;
-            font-size: 0.75rem;
+            border-radius: 8px;
+            font-size: 0.8rem;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: var(--transition);
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
         }
 
-        .btn:hover { background-color: var(--accent-hover); transform: translateY(-1px); }
-
-        .btn-copy {
-            background-color: #2c1e14;
-            border: 1px solid var(--accent-color);
-            color: var(--accent-color);
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+            color: white;
         }
 
-        .btn-copy:hover { background-color: #3e2723; }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px var(--accent-glow);
+        }
+
+        .btn-secondary {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
 
         .copy-success {
-            color: #ffb74d;
-            font-size: 0.7rem;
-            margin-right: 10px;
+            color: var(--success);
+            font-size: 0.75rem;
             opacity: 0;
             transition: opacity 0.3s;
         }
 
         .copy-success.visible { opacity: 1; }
 
-        section { padding-bottom: 6px; border-bottom: 1px solid #2c1e14; }
+        .prompt-output {
+            flex: 1;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 24px;
+            font-family: var(--mono-font);
+            font-size: 0.78rem;
+            line-height: 1.7;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            color: #e8e8f0;
+        }
 
-        .hidden { display: none; }
+        .prompt-output .section {
+            margin-bottom: 16px;
+        }
+
+        .prompt-output .section-title {
+            color: var(--accent);
+            font-weight: 600;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .prompt-output .section-title::before {
+            content: '▸';
+            color: var(--accent-secondary);
+        }
+
+        .prompt-output .section-content {
+            color: var(--text-secondary);
+            padding-left: 12px;
+        }
+
+        .prompt-output .quality-list {
+            margin-top: 8px;
+            padding-left: 12px;
+        }
+
+        .prompt-output .quality-list li {
+            color: var(--text-muted);
+            margin-bottom: 4px;
+            font-size: 0.75rem;
+        }
+
+        .prompt-output .placeholder {
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        .history-bar {
+            display: flex;
+            gap: 8px;
+            padding: 12px;
+            background: var(--bg-card);
+            border-radius: 10px;
+            overflow-x: auto;
+            margin-top: auto;
+        }
+
+        .history-item {
+            padding: 6px 12px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            white-space: nowrap;
+            transition: var(--transition);
+        }
+
+        .history-item:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .history-empty {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-align: center;
+            width: 100%;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            padding: 14px 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--accent);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 0.8rem;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: var(--transition);
+            z-index: 1000;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card { animation: fadeIn 0.4s ease-out; }
+
+        @media (max-width: 900px) {
+            .app-container { flex-direction: column; }
+            .sidebar { width: 100%; min-width: 0; max-height: none; }
+            .main { padding: 16px; }
+            .prompt-output { min-height: 300px; }
+        }
     </style>
 </head>
 <body>
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="logo">
+                <div class="logo-icon">🦊</div>
+                <div>
+                    <div class="logo-text">foxxprompt</div>
+                    <div class="logo-sub">AI Prompt Generator</div>
+                </div>
+            </div>
 
-    <aside class="sidebar">
-        <h1>🦊 foxxprompt</h1>
+            <div class="type-selector">
+                <button class="type-btn active" data-type="code" onclick="selectType('code')">
+                    <span class="icon">💻</span>
+                    <span>Code</span>
+                </button>
+                <button class="type-btn" data-type="image" onclick="selectType('image')">
+                    <span class="icon">🎨</span>
+                    <span>Image</span>
+                </button>
+                <button class="type-btn" data-type="writing" onclick="selectType('writing')">
+                    <span class="icon">✍</span>
+                    <span>Write</span>
+                </button>
+                <button class="type-btn" data-type="video" onclick="selectType('video')">
+                    <span class="icon">🎬</span>
+                    <span>Video</span>
+                </button>
+            </div>
 
-        <div class="type-selector">
-            <div class="type-btn active" data-type="code" onclick="selectType('code')">
-                <span class="icon">💻</span>
-                <span class="label">Code</span>
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Core Concept</div>
+                    <div class="quick-actions">
+                        <button class="quick-btn" onclick="loadExample()">Example</button>
+                        <button class="quick-btn" onclick="clearForm()">Clear</button>
+                    </div>
+                </div>
+                <div class="field-group">
+                    <label id="label-objective">🎯 Objective</label>
+                    <textarea id="objective" placeholder="What do you want to achieve? Be specific about the end result."></textarea>
+                </div>
+                <div class="field-group">
+                    <label id="label-context">🔧 Context</label>
+                    <textarea id="context" placeholder="Background information, existing code, constraints, relevant details..."></textarea>
+                </div>
             </div>
-            <div class="type-btn" data-type="image" onclick="selectType('image')">
-                <span class="icon">🎨</span>
-                <span class="label">Image</span>
-            </div>
-            <div class="type-btn" data-type="writing" onclick="selectType('writing')">
-                <span class="icon">✍</span>
-                <span class="label">Writing</span>
-            </div>
-            <div class="type-btn" data-type="video" onclick="selectType('video')">
-                <span class="icon">🎬</span>
-                <span class="label">Video</span>
-            </div>
-        </div>
 
-        <section id="section-core">
-            <h2>🎯 Core Concept</h2>
-            <div class="field-group">
-                <label for="main_idea">What do you want to create?</label>
-                <textarea id="main_idea" placeholder="Describe your idea in detail - what, why, and how it should work"></textarea>
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title" id="details-title">Technical Details</div>
+                    <div class="quick-actions">
+                        <button class="quick-btn" onclick="loadPreset()">Presets</button>
+                    </div>
+                </div>
+                <div class="field-group" id="field-style">
+                    <label id="label-style">Tech Stack</label>
+                    <input type="text" id="style" placeholder="e.g., React, TypeScript, Node.js...">
+                    <div class="preset-chips" id="style-presets"></div>
+                </div>
+                <div class="field-group" id="field-audience">
+                    <label id="label-audience">👥 Audience</label>
+                    <input type="text" id="audience" placeholder="Who will use/interact with this?">
+                </div>
+                <div class="field-group" id="field-format">
+                    <label id="label-format">📐 Output Format</label>
+                    <input type="text" id="format" placeholder="e.g., single file, full project, API...">
+                    <div class="preset-chips" id="format-presets"></div>
+                </div>
             </div>
-            <div class="field-group">
-                <label for="problem">Problem or Need</label>
-                <textarea id="problem" placeholder="What problem does this solve? Who is it for?"></textarea>
-            </div>
-        </section>
 
-        <section id="section-details">
-            <h2 id="details-title">📋 Technical Details</h2>
-            <div class="field-group" id="field-style">
-                <label for="style">Tech Stack / Framework</label>
-                <input type="text" id="style" placeholder="e.g., React, Node.js, TypeScript, PostgreSQL">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Tone & Style</div>
+                </div>
+                <div class="field-group">
+                    <label id="label-tone">Tone</label>
+                    <select id="tone">
+                        <option value="">Select tone...</option>
+                        <option value="professional">Professional - Clean, formal, business-ready</option>
+                        <option value="casual">Casual - Friendly, relaxed, conversational</option>
+                        <option value="technical">Technical - Detailed, precise, expert-level</option>
+                        <option value="educational">Educational - Clear, instructive, learning-focused</option>
+                        <option value="creative">Creative - Bold, imaginative, innovative</option>
+                        <option value="minimal">Minimal - Concise, efficient, no-nonsense</option>
+                    </select>
+                </div>
+                <div class="field-group">
+                    <label>Constraints (What to avoid)</label>
+                    <input type="text" id="constraints" placeholder="Elements, approaches, or styles to avoid...">
+                </div>
             </div>
-            <div class="field-group" id="field-requirements">
-                <label for="requirements">Features & Functionality</label>
-                <textarea id="requirements" placeholder="Key features, user interactions, data handling"></textarea>
-            </div>
-            <div class="field-group" id="field-audience">
-                <label for="audience">Target Audience</label>
-                <input type="text" id="audience" placeholder="Who will use this? What skill level?">
-            </div>
-        </section>
 
-        <section id="section-context">
-            <h2>🔧 Implementation</h2>
-            <div class="field-group" id="field-context">
-                <label for="context">Existing Code / References</label>
-                <textarea id="context" placeholder="Files to modify, existing codebase patterns, libraries to use">
-</textarea>
+            <div class="history-bar" id="history-bar">
+                <span class="history-empty">No recent prompts</span>
             </div>
-            <div class="field-group" id="field-format">
-                <label for="format">Output Format</label>
-                <input type="text" id="format" placeholder="e.g., single file, full project, API endpoint">
-            </div>
-            <div class="field-group" id="field-constraints">
-                <label for="constraints">Constraints / Requirements</label>
-                <input type="text" id="constraints" placeholder="Performance, browser support, deadlines">
-            </div>
-            <div class="field-group" id="field-testing">
-                <label for="testing">Testing & Verification</label>
-                <input type="text" id="testing" placeholder="How to test: e.g., unit tests, manual check">
-            </div>
-            <div class="field-group" id="field-structure">
-                <label for="structure">File Structure</label>
-                <textarea id="structure" placeholder="Specific files to create/modify, folder layout"></textarea>
-            </div>
-        </section>
+        </aside>
 
-    </aside>
-
-    <main class="main">
-        <div class="preview-header">
-            <h2 style="border: none; padding: 0; font-size: 1rem; color: var(--accent-color);">🦊 Generated Prompt</h2>
-            <div style="display: flex; align-items: center;">
-                <span id="copy-status" class="copy-success">Copied!</span>
-                <button class="btn btn-copy" onclick="copyPrompt()">Copy</button>
+        <main class="main">
+            <div class="preview-header">
+                <div class="preview-title">
+                    <span style="color: var(--accent);">✦</span> Generated Prompt
+                </div>
+                <div class="preview-actions">
+                    <span id="copy-status" class="copy-success">✓ Copied!</span>
+                    <button class="btn btn-secondary" onclick="copyPrompt()">
+                        <span>📋</span> Copy
+                    </button>
+                    <button class="btn btn-primary" onclick="saveToHistory()">
+                        <span>💾</span> Save
+                    </button>
+                </div>
             </div>
-        </div>
-        <div id="prompt-output"></div>
-    </main>
+            <div class="prompt-output" id="prompt-output"></div>
+        </main>
+    </div>
+
+    <div class="toast" id="toast"></div>
 
     <script>
         let currentType = 'code';
-
-        const inputs = ['main_idea', 'problem', 'style', 'requirements', 'audience', 'context', 'format', 'constraints', 'testing', 'structure'];
+        let promptHistory = JSON.parse(localStorage.getItem('foxxprompt_history') || '[]');
 
         const typeConfig = {
             code: {
-                detailsTitle: '📋 Technical Details',
+                detailsTitle: 'Technical Details',
                 styleLabel: 'Tech Stack / Framework',
-                stylePlaceholder: 'e.g., React, Node.js, TypeScript, PostgreSQL',
-                requirementsLabel: 'Features & Functionality',
-                requirementsPlaceholder: 'Key features, user interactions, data handling',
-                contextLabel: 'Existing Code / References',
-                contextPlaceholder: 'Files to modify, codebase patterns, libraries to use',
+                stylePlaceholder: 'e.g., React, TypeScript, Node.js, Python...',
+                stylePresets: ['React', 'Vue', 'Node.js', 'Python', 'TypeScript', 'Go', 'Rust'],
                 formatLabel: 'Output Format',
-                formatPlaceholder: 'e.g., single file, full project, API endpoint',
-                constraintsLabel: 'Constraints / Requirements',
-                constraintsPlaceholder: 'Performance needs, browser support, deadlines',
-                extra1Label: 'Testing & Verification',
-                extra1Placeholder: 'How to test: e.g., unit tests, manual check',
-                extra2Label: 'File Structure',
-                extra2Placeholder: 'Specific files to create/modify, folder layout'
+                formatPresets: ['Single file', 'Full project', 'API endpoint', 'Component', 'Script'],
+                audienceLabel: 'Target Users',
+                contextLabel: 'Existing Code / Context',
+                contextPlaceholder: 'Files to modify, codebase patterns, libraries to use...',
+                objectiveLabel: '🎯 What to Build',
+                objectivePlaceholder: 'Describe the feature, bug fix, or refactor needed...',
+                toneOptions: ['professional', 'technical', 'minimal', 'educational', 'creative']
             },
             image: {
-                detailsTitle: '🎨 Visual Details',
+                detailsTitle: 'Visual Details',
                 styleLabel: 'Art Style / Medium',
-                stylePlaceholder: 'e.g., photorealistic, oil painting, anime, 3D render',
-                requirementsLabel: 'Key Elements & Composition',
-                requirementsPlaceholder: 'Subjects, objects, atmosphere, lighting',
+                stylePlaceholder: 'e.g., photorealistic, oil painting, anime, 3D render...',
+                stylePresets: ['Photorealistic', 'Oil Painting', 'Anime', '3D Render', 'Digital Art', 'Watercolor', 'Cyberpunk'],
+                formatLabel: 'Dimensions / Aspect',
+                formatPresets: ['16:9 landscape', '1:1 square', '9:16 portrait', '4:3 standard', '4K', '8K'],
+                audienceLabel: 'Art Direction',
                 contextLabel: 'Color & Mood',
-                contextPlaceholder: 'Color palette, mood, emotional tone, reference artists',
-                formatLabel: 'Dimensions / Format',
-                formatPlaceholder: 'e.g., 1920x1080, square, portrait, landscape',
-                constraintsLabel: 'Style Constraints',
-                constraintsPlaceholder: 'Avoid elements, specific techniques',
-                extra1Label: 'Lighting',
-                extra1Placeholder: 'e.g., natural, studio, dramatic, soft, backlit',
-                extra2Label: 'Reference Images',
-                extra2Placeholder: 'Links or descriptions of reference images'
+                contextPlaceholder: 'Color palette, mood, emotional tone, reference artists...',
+                objectiveLabel: '🎯 Visual Goal',
+                objectivePlaceholder: 'Describe what you want to see - subjects, scenes, concepts...',
+                toneOptions: ['professional', 'creative']
             },
             writing: {
-                detailsTitle: '✍ Content Details',
-                styleLabel: 'Tone / Voice',
-                stylePlaceholder: 'e.g., formal, casual, humorous, persuasive, academic',
-                requirementsLabel: 'Key Points & Structure',
-                requirementsPlaceholder: 'Main topics, arguments, sections to include',
-                contextLabel: 'Audience & Context',
-                contextPlaceholder: 'Reader knowledge level, publication context',
+                detailsTitle: 'Content Details',
+                styleLabel: 'Content Type / Genre',
+                stylePlaceholder: 'e.g., blog post, technical docs, email, story...',
+                stylePresets: ['Blog Post', 'Article', 'Documentation', 'Email', 'Story', 'Script', 'Social Media'],
                 formatLabel: 'Format / Length',
-                formatPlaceholder: 'e.g., blog post, 1000 words, technical docs',
-                constraintsLabel: 'Writing Constraints',
-                constraintsPlaceholder: 'Avoid certain phrases, SEO keywords, style rules',
-                extra1Label: 'Deadline / Urgency',
-                extra1Placeholder: 'When needed, priority level',
-                extra2Label: 'SEO / Keywords',
-                extra2Placeholder: 'Keywords to include, search terms'
+                formatPresets: ['500 words', '1000 words', '2000 words', 'Brief', 'Detailed', 'Bulleted list'],
+                audienceLabel: 'Target Readers',
+                contextLabel: 'Purpose / Context',
+                contextPlaceholder: 'Why are you writing this? What action should readers take?',
+                objectiveLabel: '🎯 Content Goal',
+                objectivePlaceholder: 'What message or information do you want to convey?',
+                toneOptions: ['professional', 'casual', 'educational', 'creative']
             },
             video: {
-                detailsTitle: '🎬 Production Details',
-                styleLabel: 'Visual Style / Mood',
-                stylePlaceholder: 'e.g., cinematic, documentary, animated, vlog',
-                requirementsLabel: 'Key Scenes / Shots',
-                requirementsPlaceholder: 'Scenes, transitions, specific shots needed',
-                contextLabel: 'Audio & Music',
-                contextPlaceholder: 'Background music, voiceover, sound effects',
-                formatLabel: 'Resolution / Aspect',
-                formatPlaceholder: 'e.g., 4K, 1080p, 16:9, 9:16, 60fps',
-                constraintsLabel: 'Production Constraints',
-                constraintsPlaceholder: 'Budget, length, animation style',
-                extra1Label: 'Duration',
-                extra1Placeholder: 'e.g., 30 seconds, 5 minutes, full episode',
-                extra2Label: 'Characters / Subjects',
-                extra2Placeholder: 'Who or what appears on screen'
+                detailsTitle: 'Production Details',
+                styleLabel: 'Visual Style / Genre',
+                stylePlaceholder: 'e.g., cinematic, documentary, animated, vlog...',
+                stylePresets: ['Cinematic', 'Documentary', 'Vlog', 'Animation', 'Tutorial', 'Music Video', 'Commercial'],
+                formatLabel: 'Resolution / Platform',
+                formatPresets: ['1080p', '4K', '16:9', '9:16 TikTok', 'Vertical', 'YouTube', 'Instagram'],
+                audienceLabel: 'Viewers',
+                contextLabel: 'Audio / Music',
+                contextPlaceholder: 'Background music style, voiceover, sound effects...',
+                objectiveLabel: '🎯 Video Goal',
+                objectivePlaceholder: 'What story or message should the video convey?',
+                toneOptions: ['professional', 'casual', 'creative']
+            }
+        };
+
+        const examples = {
+            code: {
+                objective: 'Build a React hook for managing complex form state with validation',
+                context: 'Using React 18, TypeScript, and Zod for validation. Need to handle nested forms, array fields, and async validation.',
+                style: 'React, TypeScript, Zod',
+                audience: 'Frontend developers using the hook in production apps',
+                format: 'Single TypeScript file with comprehensive comments',
+                tone: 'technical',
+                constraints: 'Avoid external dependencies beyond React and Zod'
+            },
+            image: {
+                objective: 'A majestic fox sitting on a cliff at sunset',
+                context: 'Warm golden hour lighting, dramatic clouds, cinematic atmosphere',
+                style: 'Photorealistic, digital painting',
+                audience: 'Fantasy art enthusiasts',
+                format: '16:9 landscape, 4K',
+                tone: 'creative',
+                constraints: 'Avoid cartoonish style, no text in image'
+            },
+            writing: {
+                objective: 'Explain how to build a REST API from scratch',
+                context: 'For beginner developers who know basic JavaScript',
+                style: 'Tutorial / How-to guide',
+                audience: 'Junior developers learning backend',
+                format: 'Step-by-step blog post, ~1500 words',
+                tone: 'educational',
+                constraints: 'Avoid jargon without explanation'
+            },
+            video: {
+                objective: 'A quick product demo for a SaaS dashboard',
+                context: 'High-energy, showing key features in under 60 seconds',
+                style: 'Modern tech demo, fast cuts',
+                audience: 'Potential customers visiting landing page',
+                format: 'Vertical 9:16, 60 seconds',
+                tone: 'professional',
+                constraints: 'No talking head, just screen recording with motion'
             }
         };
 
@@ -359,22 +691,65 @@
             document.querySelectorAll('.type-btn').forEach(btn => {
                 btn.classList.toggle('active', btn.dataset.type === type);
             });
-            const config = typeConfig[type];
+            updateFormLabels();
+            generatePrompt();
+        }
+
+        function updateFormLabels() {
+            const config = typeConfig[currentType];
             document.getElementById('details-title').textContent = config.detailsTitle;
-            document.querySelector('#field-style label').textContent = config.styleLabel;
+            document.getElementById('label-style').textContent = config.styleLabel;
             document.getElementById('style').placeholder = config.stylePlaceholder;
-            document.querySelector('#field-requirements label').textContent = config.requirementsLabel;
-            document.getElementById('requirements').placeholder = config.requirementsPlaceholder;
-            document.querySelector('#field-context label').textContent = config.contextLabel;
-            document.getElementById('context').placeholder = config.contextPlaceholder;
-            document.querySelector('#field-format label').textContent = config.formatLabel;
-            document.getElementById('format').placeholder = config.formatPlaceholder;
-            document.querySelector('#field-constraints label').textContent = config.constraintsLabel;
-            document.getElementById('constraints').placeholder = config.constraintsPlaceholder;
-            document.querySelector('#field-testing label').textContent = config.extra1Label;
-            document.getElementById('testing').placeholder = config.extra1Placeholder;
-            document.querySelector('#field-structure label').textContent = config.extra2Label;
-            document.getElementById('structure').placeholder = config.extra2Placeholder;
+            document.getElementById('label-format').textContent = config.formatLabel;
+            document.getElementById('label-audience').textContent = config.audienceLabel;
+            document.getElementById('label-context').textContent = config.contextLabel;
+            document.getElementById('label-objective').textContent = config.objectiveLabel;
+            document.getElementById('objective').placeholder = config.objectivePlaceholder;
+
+            const toneSelect = document.getElementById('tone');
+            toneSelect.innerHTML = '<option value="">Select tone...</option>';
+            config.toneOptions.forEach(tone => {
+                const option = document.createElement('option');
+                option.value = tone;
+                option.textContent = tone.charAt(0).toUpperCase() + tone.slice(1);
+                toneSelect.appendChild(option);
+            });
+
+            renderPresets(config);
+        }
+
+        function renderPresets(config) {
+            const stylePresets = document.getElementById('style-presets');
+            const formatPresets = document.getElementById('format-presets');
+            stylePresets.innerHTML = config.stylePresets.map(s => 
+                `<span class="preset-chip" onclick="setField('style', '${s}')">${s}</span>`
+            ).join('');
+            formatPresets.innerHTML = config.formatPresets.map(f => 
+                `<span class="preset-chip" onclick="setField('format', '${f}')">${f}</span>`
+            ).join('');
+        }
+
+        function setField(id, value) {
+            document.getElementById(id).value = value;
+            generatePrompt();
+        }
+
+        function loadExample() {
+            const ex = examples[currentType];
+            document.getElementById('objective').value = ex.objective;
+            document.getElementById('context').value = ex.context;
+            document.getElementById('style').value = ex.style;
+            document.getElementById('audience').value = ex.audience;
+            document.getElementById('format').value = ex.format;
+            document.getElementById('tone').value = ex.tone;
+            document.getElementById('constraints').value = ex.constraints;
+            generatePrompt();
+        }
+
+        function clearForm() {
+            ['objective', 'context', 'style', 'audience', 'format', 'tone', 'constraints'].forEach(id => {
+                document.getElementById(id).value = '';
+            });
             generatePrompt();
         }
 
@@ -384,144 +759,194 @@
         }
 
         function generatePrompt() {
-            const mainIdea = getValue('main_idea');
-            const problem = getValue('problem');
-            const style = getValue('style');
-            const requirements = getValue('requirements');
-            const audience = getValue('audience');
+            const objective = getValue('objective');
             const context = getValue('context');
+            const style = getValue('style');
+            const audience = getValue('audience');
             const format = getValue('format');
+            const tone = getValue('tone');
             const constraints = getValue('constraints');
-            const testing = getValue('testing');
-            const structure = getValue('structure');
 
-            const typeLabels = {
-                code: '💻 Code Development',
-                image: '🎨 Image Generation',
-                writing: '✍ Writing',
-                video: '🎬 Video Production'
-            };
+            let prompt = `## 🎯 OBJECTIVE\n${objective || '[Describe what you want to achieve]'}\n\n`;
 
-            let prompt = `# ${typeLabels[currentType]} Prompt\n\n`;
-            
-            prompt += `## 🎯 Core Concept\n`;
-            prompt += `${mainIdea || '[Describe what you want to create]'}\n\n`;
-
-            if (problem) {
-                prompt += `## ❓ Problem Solved\n${problem}\n\n`;
+            prompt += `## 📋 CONTEXT\n`;
+            if (context) {
+                prompt += `${context}\n`;
+            } else {
+                prompt += `[Add background details, constraints, or relevant information]\n`;
             }
+            prompt += `\n`;
 
-            if (requirements) {
-                prompt += `## 📦 Requirements\n${requirements}\n\n`;
-            }
+            prompt += generateStyleSection();
+            prompt += `\n`;
 
-            if (style) {
-                if (currentType === 'code') {
-                    prompt += `## 🛠 Tech Stack\n${style}\n\n`;
-                } else if (currentType === 'image') {
-                    prompt += `## 🎨 Art Style\n${style}\n\n`;
-                } else if (currentType === 'writing') {
-                    prompt += `## 🎭 Tone & Voice\n${style}\n\n`;
-                } else if (currentType === 'video') {
-                    prompt += `## 🎬 Visual Style\n${style}\n\n`;
-                }
+            if (audience) {
+                prompt += `## 👥 AUDIENCE\n${audience}\n\n`;
             }
 
             if (format) {
-                prompt += `## 📐 Output Format\n${format}\n\n`;
+                prompt += `## 📐 OUTPUT FORMAT\n${format}\n\n`;
             }
 
-            if (audience) {
-                prompt += `## 👥 Target Audience\n${audience}\n\n`;
-            }
-
-            if (context) {
-                prompt += `## 📚 Context & References\n${context}\n\n`;
+            if (tone) {
+                prompt += generateToneSection();
             }
 
             if (constraints) {
-                prompt += `## ⚠ Constraints\n${constraints}\n\n`;
+                prompt += `## ⚠️ CONSTRAINTS\n- Avoid: ${constraints}\n\n`;
             }
 
-            if (testing) {
-                if (currentType === 'code') {
-                    prompt += `## 🧪 Testing & Verification\n${testing}\n\n`;
-                }
-            }
+            prompt += generateQualityRequirements();
 
-            if (structure) {
-                if (currentType === 'code') {
-                    prompt += `## 📁 File Structure\n${structure}\n\n`;
-                }
-            }
-
-            if (currentType === 'image') {
-                const lighting = getValue('testing');
-                const references = getValue('structure');
-                if (lighting) prompt += `## 💡 Lighting\n${lighting}\n\n`;
-                if (references) prompt += `## 🖼 Reference Images\n${references}\n\n`;
-            }
-
-            if (currentType === 'writing') {
-                const deadline = getValue('testing');
-                const seo = getValue('structure');
-                if (deadline) prompt += `## ⏰ Deadline\n${deadline}\n\n`;
-                if (seo) prompt += `## 🔍 SEO / Keywords\n${seo}\n\n`;
-            }
-
-            if (currentType === 'video') {
-                const duration = getValue('testing');
-                const characters = getValue('structure');
-                if (duration) prompt += `## ⏱ Duration\n${duration}\n\n`;
-                if (characters) prompt += `## 🎭 Characters / Subjects\n${characters}\n\n`;
-            }
-
-            prompt += `## ✅ Quality Requirements\n`;
-            if (currentType === 'code') {
-                prompt += `- Write clean, modular, well-documented code\n`;
-                prompt += `- Follow best practices for the chosen tech stack\n`;
-                prompt += `- Include proper error handling and edge cases\n`;
-                prompt += `- Ensure code is functional, complete, and production-ready\n`;
-                prompt += `- Add comments explaining complex logic\n`;
-                prompt += `- Consider security, performance, and accessibility\n`;
-            } else if (currentType === 'image') {
-                prompt += `- Create visually compelling, balanced composition\n`;
-                prompt += `- Ensure proper lighting, shadows, and depth\n`;
-                prompt += `- Pay attention to details, textures, and materials\n`;
-                prompt += `- Match the specified art style consistently\n`;
-                prompt += `- Deliver high-resolution, polished output\n`;
-                prompt += `- Avoid artifacts, distortions, or visual errors\n`;
-            } else if (currentType === 'writing') {
-                prompt += `- Write engaging, well-structured content\n`;
-                prompt += `- Ensure clarity, coherence, and logical flow\n`;
-                prompt += `- Match the requested tone and voice throughout\n`;
-                prompt += `- Use appropriate vocabulary for the audience\n`;
-                prompt += `- Include all required key points and sections\n`;
-                prompt += `- Deliver polished, publication-ready text\n`;
-            } else if (currentType === 'video') {
-                prompt += `- Plan coherent visual storytelling with clear narrative\n`;
-                prompt += `- Ensure smooth transitions, pacing, and timing\n`;
-                prompt += `- Match mood and tone consistently throughout\n`;
-                prompt += `- Use appropriate camera angles and shot types\n`;
-                prompt += `- Sync audio and visuals effectively\n`;
-                prompt += `- Deliver production-ready, professional output\n`;
-            }
-
-            document.getElementById('prompt-output').textContent = prompt;
+            document.getElementById('prompt-output').innerHTML = formatPromptOutput(prompt);
         }
 
-        inputs.forEach(id => {
-            document.getElementById(id).addEventListener('input', generatePrompt);
-        });
+        function generateStyleSection() {
+            switch(currentType) {
+                case 'code':
+                    return `## 💻 TECH STACK\n${getValue('style') || '[Specify frameworks, languages, libraries]'}\n\n`;
+                case 'image':
+                    return `## 🎨 ART STYLE\n${getValue('style') || '[Define the visual style, medium, or aesthetic]'}\n\n`;
+                case 'writing':
+                    return `## 📝 CONTENT TYPE\n${getValue('style') || '[Specify the type of content or genre]'}\n\n`;
+                case 'video':
+                    return `## 🎬 STYLE / GENRE\n${getValue('style') || '[Define the visual style or production type]'}\n\n`;
+            }
+        }
+
+        function generateToneSection() {
+            const tone = getValue('tone');
+            const toneGuides = {
+                professional: 'Clean, formal, business-appropriate language. Use precise terminology.',
+                casual: 'Friendly, relaxed, conversational. Use natural phrasing.',
+                technical: 'Detailed, precise, expert-level. Include technical specifics.',
+                educational: 'Clear, instructive, patient. Explain concepts thoroughly.',
+                creative: 'Bold, imaginative, innovative. Use creative language.',
+                minimal: 'Concise, efficient, no-nonsense. Remove unnecessary words.'
+            };
+            return `## 🎭 TONE & STYLE\n${toneGuides[tone] || ''}\n\n`;
+        }
+
+        function generateQualityRequirements() {
+            let reqs = '## ✅ QUALITY REQUIREMENTS\n';
+            switch(currentType) {
+                case 'code':
+                    reqs += '- Write clean, modular, production-ready code\n';
+                    reqs += '- Include comprehensive comments and documentation\n';
+                    reqs += '- Implement proper error handling and edge cases\n';
+                    reqs += '- Follow security best practices (input validation, no hardcoded secrets)\n';
+                    reqs += '- Optimize for performance where applicable\n';
+                    reqs += '- Use modern language features and best practices\n';
+                    reqs += '- Include unit tests or testing approach\n';
+                    break;
+                case 'image':
+                    reqs += '- Create balanced, visually compelling composition\n';
+                    reqs += '- Ensure proper lighting, shadows, and depth\n';
+                    reqs += '- Pay attention to details, textures, and materials\n';
+                    reqs += '- Maintain consistent style throughout\n';
+                    reqs += '- Deliver high-resolution output\n';
+                    reqs += '- Avoid artifacts, distortions, or visual errors\n';
+                    break;
+                case 'writing':
+                    reqs += '- Write engaging, well-structured content\n';
+                    reqs += '- Ensure clarity, coherence, and logical flow\n';
+                    reqs += '- Use appropriate vocabulary for the target audience\n';
+                    reqs += '- Maintain consistent tone throughout\n';
+                    reqs += '- Include clear call-to-action or conclusion\n';
+                    reqs += '- Proofread for grammar and spelling\n';
+                    break;
+                case 'video':
+                    reqs += '- Plan clear visual storytelling with coherent narrative\n';
+                    reqs += '- Ensure smooth transitions, pacing, and timing\n';
+                    reqs += '- Maintain consistent mood and tone\n';
+                    reqs += '- Use appropriate camera angles and shot types\n';
+                    reqs += '- Sync audio and visuals effectively\n';
+                    reqs += '- Optimize for the target platform\n';
+                    break;
+            }
+            return reqs;
+        }
+
+        function formatPromptOutput(text) {
+            const lines = text.split('\n');
+            let html = '';
+            let inList = false;
+            
+            for (let line of lines) {
+                if (line.startsWith('## ')) {
+                    if (inList) { html += '</ul>'; inList = false; }
+                    const title = line.replace('## ', '');
+                    html += `<div class="section"><div class="section-title">${title}</div>`;
+                } else if (line.startsWith('- ')) {
+                    if (!inList) { html += '<ul class="quality-list">'; inList = true; }
+                    html += `<li>${line.replace('- ', '')}</li>`;
+                } else if (line.trim() === '') {
+                    if (inList) { html += '</ul></div>'; inList = false; }
+                    else if (html.endsWith('</div>')) { html += '</div>'; }
+                } else {
+                    html += `<div class="section-content">${line || '<span class="placeholder">[Add details]</span>'}</div></div>`;
+                }
+            }
+            if (inList) html += '</ul>';
+            return html;
+        }
 
         function copyPrompt() {
-            navigator.clipboard.writeText(document.getElementById('prompt-output').textContent).then(() => {
+            const text = document.getElementById('prompt-output').textContent;
+            navigator.clipboard.writeText(text).then(() => {
                 const status = document.getElementById('copy-status');
                 status.classList.add('visible');
                 setTimeout(() => status.classList.remove('visible'), 2000);
             });
         }
 
+        function saveToHistory() {
+            const text = document.getElementById('prompt-output').textContent;
+            const summary = document.getElementById('objective').value.substring(0, 40) || 'Untitled';
+            const entry = { 
+                type: currentType, 
+                summary: summary + (summary.length >= 40 ? '...' : ''),
+                content: text,
+                timestamp: Date.now()
+            };
+            promptHistory.unshift(entry);
+            if (promptHistory.length > 10) promptHistory.pop();
+            localStorage.setItem('foxxprompt_history', JSON.stringify(promptHistory));
+            renderHistory();
+            showToast('Prompt saved!');
+        }
+
+        function renderHistory() {
+            const bar = document.getElementById('history-bar');
+            if (promptHistory.length === 0) {
+                bar.innerHTML = '<span class="history-empty">No recent prompts</span>';
+                return;
+            }
+            bar.innerHTML = promptHistory.map((entry, i) => 
+                `<div class="history-item" onclick="loadHistory(${i})">${entry.type} · ${entry.summary}</div>`
+            ).join('');
+        }
+
+        function loadHistory(index) {
+            const entry = promptHistory[index];
+            selectType(entry.type);
+            document.getElementById('prompt-output').textContent = entry.content;
+            showToast('Loaded from history');
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2500);
+        }
+
+        document.querySelectorAll('input, textarea, select').forEach(el => {
+            el.addEventListener('input', generatePrompt);
+        });
+
+        updateFormLabels();
+        renderHistory();
         generatePrompt();
     </script>
 </body>
