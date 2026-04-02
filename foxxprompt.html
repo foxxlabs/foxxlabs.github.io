@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🦊 foxxprompt | AI Prompt Generator</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🦊</text></svg>">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✏️</text></svg>">
     <style>
         :root {
             --bg-primary: #0a0a0f;
@@ -96,6 +96,9 @@
             justify-content: center;
             font-size: 1.2rem;
             box-shadow: 0 4px 20px var(--accent-glow);
+        }
+        .logo-icon::after {
+            content: '✏️';
         }
 
         .logo-text {
@@ -479,6 +482,205 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
+        .mode-toggle {
+            display: flex;
+            gap: 4px;
+            background: var(--bg-tertiary);
+            padding: 4px;
+            border-radius: 8px;
+            margin-bottom: 14px;
+        }
+
+        .mode-btn {
+            flex: 1;
+            padding: 8px 12px;
+            background: transparent;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            font-size: 0.7rem;
+            font-weight: 500;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .mode-btn:hover {
+            color: var(--text-primary);
+        }
+
+        .mode-btn.active {
+            background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+            color: white;
+            box-shadow: 0 2px 10px var(--accent-glow);
+        }
+
+        .wizard-type-selector {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 12px;
+        }
+
+        .wizard-type-btn {
+            flex: 1;
+            padding: 6px 8px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-secondary);
+            font-size: 0.6rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .wizard-type-btn:hover {
+            border-color: var(--accent);
+        }
+
+        .wizard-type-btn.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: white;
+        }
+
+        .wizard-progress {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 14px;
+            padding: 8px;
+            background: var(--bg-card);
+            border-radius: 8px;
+        }
+
+        .wizard-progress-dot {
+            flex: 1;
+            height: 6px;
+            background: var(--bg-tertiary);
+            border-radius: 3px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .wizard-progress-dot.completed {
+            background: var(--success);
+        }
+
+        .wizard-progress-dot.current {
+            background: var(--accent);
+            box-shadow: 0 0 8px var(--accent-glow);
+        }
+
+        .wizard-step-area {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .wizard-step-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .wizard-step-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            background: var(--bg-tertiary);
+            border-radius: 12px;
+            font-size: 0.65rem;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+        }
+
+        .wizard-question {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+        }
+
+        .wizard-subtitle {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        .wizard-input-area {
+            margin-bottom: 20px;
+        }
+
+        .wizard-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .wizard-chip {
+            padding: 6px 12px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .wizard-chip:hover {
+            border-color: var(--accent);
+        }
+
+        .wizard-chip.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: white;
+        }
+
+        .wizard-nav {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .wizard-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .wizard-btn-back {
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+        }
+
+        .wizard-btn-back:hover {
+            background: var(--bg-card);
+            color: var(--text-primary);
+        }
+
+        .wizard-btn-back:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .wizard-btn-next {
+            background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+            color: white;
+        }
+
+        .wizard-btn-next:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px var(--accent-glow);
+        }
+
         .card { animation: fadeIn 0.4s ease-out; }
 
         @media (max-width: 900px) {
@@ -500,6 +702,16 @@
                 </div>
             </div>
 
+            <div class="mode-toggle">
+                <button class="mode-btn active" onclick="setMode('quick')">
+                    <span>⚡</span> Quick Form
+                </button>
+                <button class="mode-btn" onclick="setMode('wizard')">
+                    <span>🪄</span> Wizard
+                </button>
+            </div>
+
+            <div id="quick-form">
             <div class="type-selector">
                 <button class="type-btn active" data-type="code" onclick="selectType('code')">
                     <span class="icon">💻</span>
@@ -601,6 +813,9 @@
             <div class="history-bar" id="history-bar">
                 <span class="history-empty">No recent prompts</span>
             </div>
+            </div>
+
+            <div id="wizard-container" style="display: none;"></div>
         </aside>
 
         <main class="main">
@@ -627,6 +842,468 @@
     <script>
         let currentType = 'code';
         let promptHistory = JSON.parse(localStorage.getItem('foxxprompt_history') || '[]');
+        let currentMode = sessionStorage.getItem('foxxprompt_mode') || 'quick';
+
+        const wizardState = {
+            currentStep: 1,
+            answers: {}
+        };
+
+        function setMode(mode) {
+            currentMode = mode;
+            sessionStorage.setItem('foxxprompt_mode', mode);
+            document.querySelectorAll('.mode-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.textContent.toLowerCase().includes(mode));
+            });
+            document.getElementById('quick-form').style.display = mode === 'quick' ? 'block' : 'none';
+            document.getElementById('wizard-container').style.display = mode === 'wizard' ? 'block' : 'none';
+            
+            if (mode === 'wizard') {
+                initWizard();
+            } else {
+                sessionStorage.removeItem('foxxprompt_wizard');
+                wizardState.currentStep = 1;
+                wizardState.answers = {};
+            }
+        }
+
+        const wizardSteps = {
+            code: [
+                { id: 'feature_description', label: 'What are you building?', placeholder: 'e.g., A React hook for form validation with async support', type: 'text', required: true },
+                { id: 'developer_level', label: 'What\'s your role?', options: ['Junior Developer', 'Mid-Level', 'Senior Developer', 'Staff Engineer', 'Principal Engineer', 'Architect'], default: 'Senior Developer', type: 'select' },
+                { id: 'tech_stack', label: 'Tech stack?', chips: ['React', 'Vue', 'Angular', 'Node.js', 'Python', 'Go', 'Rust', 'TypeScript', 'PostgreSQL', 'MongoDB', 'Docker', 'Kubernetes'], type: 'chips' },
+                { id: 'file_structure', label: 'File structure', placeholder: 'Project file structure or key files...', type: 'text', optional: true },
+                { id: 'existing_patterns', label: 'Coding patterns', placeholder: 'Coding patterns, conventions used...', type: 'text', optional: true },
+                { id: 'constraints', label: 'Constraints', placeholder: 'Legacy code, technical debt, limitations...', type: 'text', optional: true },
+                { id: 'requirements', label: 'Key requirements', chips: ['Performance Optimization', 'Security', 'Error Handling', 'Testing', 'Accessibility', 'Documentation', 'API Design', 'Scalability', 'Logging/Monitoring'], type: 'chips-multi' },
+                { id: 'output_format', label: 'Output format', options: ['Single File', 'Full Project', 'API Endpoint', 'Component', 'Script', 'Test Suite', 'Documentation'], default: 'Single File', type: 'select' },
+                { id: 'special_constraints', label: 'Special constraints', placeholder: 'Deadlines, team size, legacy compatibility...', type: 'text', optional: true }
+            ],
+            image: [
+                { id: 'subject', label: 'What do you want to see?', placeholder: 'Describe your main subject in detail...', type: 'text', required: true },
+                { id: 'art_style', label: 'Art style?', options: ['Photorealistic', 'Digital Painting', 'Oil Painting', 'Watercolor', 'Anime', '3D Render', 'Vector Illustration', 'Concept Art', 'Cyberpunk', 'Fantasy'], default: 'Photorealistic', type: 'select' },
+                { id: 'mood', label: 'Mood & atmosphere?', options: ['Dark', 'Bright', 'Dramatic', 'Peaceful', 'Mysterious', 'Romantic', 'Epic', 'Melancholic', 'Futuristic', 'Vintage'], default: 'Dramatic', type: 'select' },
+                { id: 'composition', label: 'Composition?', options: ['Close-up', 'Wide Shot', 'Symmetrical', 'Rule of Thirds', 'Centered', 'Dutch Angle', 'Bird\'s Eye', 'Worm\'s Eye'], default: 'Rule of Thirds', type: 'select' },
+                { id: 'lighting', label: 'Lighting?', options: ['Golden Hour', 'Blue Hour', 'Neon', 'Natural Light', 'Studio Lighting', 'Dramatic Shadows', 'Backlit', 'Volumetric', 'Cinematic'], default: 'Golden Hour', type: 'select' },
+                { id: 'resolution', label: 'Resolution?', options: ['2K', '4K', '8K'], default: '4K', type: 'select' },
+                { id: 'aspect_ratio', label: 'Aspect ratio?', options: ['16:9', '1:1', '9:16', '4:3', '21:9'], default: '16:9', type: 'select' },
+                { id: 'quality', label: 'Quality level?', options: ['Standard', 'Detailed', 'Masterwork', 'Ultra-detailed'], default: 'Detailed', type: 'select' },
+                { id: 'avoid', label: 'What to avoid?', placeholder: 'Elements, styles, or artifacts to avoid...', type: 'text', optional: true }
+            ],
+            writing: [
+                { id: 'content_type', label: 'Content type?', options: ['Blog Post', 'Article', 'Tutorial', 'Documentation', 'Email', 'Social Media', 'Story', 'Script', 'Case Study', 'Landing Page'], default: 'Blog Post', type: 'select' },
+                { id: 'main_message', label: 'Main message?', placeholder: 'What is the key point or message?', type: 'text', required: true },
+                { id: 'expertise_level', label: 'Audience expertise?', options: ['Beginner', 'Intermediate', 'Advanced', 'Expert'], default: 'Intermediate', type: 'select' },
+                { id: 'demographics', label: 'Audience demographics', placeholder: 'Age, profession, interests (optional)...', type: 'text', optional: true },
+                { id: 'tone', label: 'Tone?', options: ['Professional', 'Casual', 'Witty', 'Authoritative', 'Friendly', 'Inspirational', 'Educational', 'Persuasive'], default: 'Professional', type: 'select' },
+                { id: 'structure', label: 'Structure?', options: ['Listicle', 'Tutorial', 'Narrative', 'Argument', 'How-to', 'Comparison', 'Review', 'Case Study'], default: 'How-to', type: 'select' },
+                { id: 'word_count', label: 'Length (words)?', options: ['<500', '500-1000', '1000-1500', '1500-2500', '2500-5000', '5000+'], default: '1000-1500', type: 'select' },
+                { id: 'detail_level', label: 'Detail level?', options: ['Brief', 'Standard', 'Comprehensive'], default: 'Standard', type: 'select' },
+                { id: 'cta', label: 'Call-to-action', placeholder: 'What should the reader do after reading?', type: 'text', optional: true }
+            ],
+            video: [
+                { id: 'topic', label: 'Video topic?', placeholder: 'What is the video about?', type: 'text', required: true },
+                { id: 'format', label: 'Format?', options: ['Tutorial', 'Product Demo', 'Vlog', 'Documentary', 'Commercial', 'Music Video', 'Animation', 'Interview', 'Explainer'], default: 'Tutorial', type: 'select' },
+                { id: 'duration', label: 'Duration?', options: ['Short (<60s)', 'Medium (1-5min)', 'Long (5-15min)', 'Feature (15min+)'], default: 'Medium', type: 'select' },
+                { id: 'platform', label: 'Platform?', options: ['YouTube', 'TikTok', 'Instagram Reels', 'LinkedIn', 'Twitter/X', 'Podcast'], default: 'YouTube', type: 'select' },
+                { id: 'visual_style', label: 'Visual style?', options: ['Cinematic', 'Minimal', 'Energetic', 'Documentary', 'Retro', 'Modern Tech', 'Hand-drawn', 'Motion Graphics'], default: 'Cinematic', type: 'select' },
+                { id: 'voiceover', label: 'Voiceover?', options: ['Yes', 'No'], default: 'Yes', type: 'select' },
+                { id: 'music', label: 'Music?', options: ['Original', 'Stock', 'No Music'], default: 'Stock', type: 'select' },
+                { id: 'sound_effects', label: 'Sound effects?', options: ['Yes', 'No'], default: 'Yes', type: 'select' },
+                { id: 'key_moments', label: 'Key moments', placeholder: 'Must-have shots, transitions, effects...', type: 'text', optional: true }
+            ]
+        };
+
+        function initWizard() {
+            const saved = sessionStorage.getItem('foxxprompt_wizard');
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                wizardState.currentStep = parsed.currentStep || 1;
+                wizardState.answers = parsed.answers || {};
+            }
+            
+            const container = document.getElementById('wizard-container');
+            const steps = wizardSteps[currentType];
+            
+            const typeSelectorHTML = `
+                <div class="wizard-type-selector">
+                    ${['code', 'image', 'writing', 'video'].map(t => `
+                        <button class="wizard-type-btn ${t === currentType ? 'active' : ''}" onclick="switchWizardType('${t}')">${t === 'code' ? '💻' : t === 'image' ? '🎨' : t === 'writing' ? '✍' : '🎬'} ${t.charAt(0).toUpperCase() + t.slice(1)}</button>
+                    `).join('')}
+                </div>
+            `;
+            const progressHTML = `<div class="wizard-progress"></div>`;
+            
+            container.innerHTML = typeSelectorHTML + progressHTML + '<div class="wizard-step-area"></div>';
+            
+            renderWizardStep();
+            updateProgressBar();
+        }
+
+        function renderWizardStep() {
+            const steps = wizardSteps[currentType];
+            const step = steps[wizardState.currentStep - 1];
+            const stepArea = document.querySelector('.wizard-step-area');
+            if (!stepArea) return;
+            
+            const currentValue = wizardState.answers[step.id] || step.default || '';
+            
+            let inputHTML = '';
+            switch(step.type) {
+                case 'text':
+                    inputHTML = `<textarea id="wizard-input" placeholder="${step.placeholder || ''}" rows="3">${currentValue}</textarea>`;
+                    break;
+                case 'select':
+                    inputHTML = `<select id="wizard-input">${step.options.map(o => `<option value="${o}" ${o === currentValue ? 'selected' : ''}>${o}</option>`).join('')}</select>`;
+                    break;
+                case 'chips':
+                    const selectedChips = wizardState.answers[step.id] || [];
+                    inputHTML = `<div class="wizard-chips">${(step.chips || []).map(c => `<span class="wizard-chip ${selectedChips.includes(c) ? 'active' : ''}" onclick="toggleChip('${step.id}', '${c}')">${c}</span>`).join('')}</div>`;
+                    break;
+                case 'chips-multi':
+                    const selectedMulti = wizardState.answers[step.id] || [];
+                    inputHTML = `<div class="wizard-chips">${(step.chips || []).map(c => `<span class="wizard-chip ${selectedMulti.includes(c) ? 'active' : ''}" onclick="toggleChipMulti('${step.id}', '${c}')">${c}</span>`).join('')}</div>`;
+                    break;
+            }
+            
+            stepArea.innerHTML = `
+                <div class="wizard-step-card">
+                    <div class="wizard-step-badge">Step ${wizardState.currentStep} of ${steps.length}</div>
+                    <h3 class="wizard-question">${step.label}</h3>
+                    <p class="wizard-subtitle">${step.required ? 'Required' : 'Optional'}</p>
+                    <div class="wizard-input-area">${inputHTML}</div>
+                    <div class="wizard-nav">
+                        <button class="wizard-btn wizard-btn-back" onclick="wizardBack()" ${wizardState.currentStep === 1 ? 'disabled' : ''}>← Back</button>
+                        <button class="wizard-btn wizard-btn-next" onclick="wizardNext()">${wizardState.currentStep === steps.length ? 'Finish ✨' : 'Next →'}</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function wizardNext() {
+            const step = wizardSteps[currentType][wizardState.currentStep - 1];
+            const input = document.getElementById('wizard-input');
+            
+            if (step.required && step.type !== 'chips' && step.type !== 'chips-multi') {
+                if (!input || !input.value.trim()) {
+                    showToast('Please fill in this field');
+                    return;
+                }
+            }
+            
+            if (step.type === 'chips' || step.type === 'chips-multi') {
+                if (!wizardState.answers[step.id] || wizardState.answers[step.id].length === 0) {
+                    wizardState.answers[step.id] = step.default ? [step.default] : [];
+                }
+            } else if (input) {
+                wizardState.answers[step.id] = input.value;
+            }
+            
+            saveWizardState();
+            
+            if (wizardState.currentStep < wizardSteps[currentType].length) {
+                wizardState.currentStep++;
+                renderWizardStep();
+            } else {
+                generateWizardPrompt();
+            }
+            updateProgressBar();
+        }
+
+        function wizardBack() {
+            if (wizardState.currentStep > 1) {
+                wizardState.currentStep--;
+                saveWizardState();
+                renderWizardStep();
+                updateProgressBar();
+            }
+        }
+
+        function toggleChip(fieldId, value) {
+            if (!wizardState.answers[fieldId]) wizardState.answers[fieldId] = [];
+            if (wizardState.answers[fieldId].includes(value)) {
+                wizardState.answers[fieldId] = wizardState.answers[fieldId].filter(v => v !== value);
+            } else {
+                wizardState.answers[fieldId].push(value);
+            }
+            renderWizardStep();
+        }
+
+        function toggleChipMulti(fieldId, value) {
+            toggleChip(fieldId, value);
+        }
+
+        function saveWizardState() {
+            sessionStorage.setItem('foxxprompt_wizard', JSON.stringify({
+                currentStep: wizardState.currentStep,
+                answers: wizardState.answers
+            }));
+        }
+
+        function switchWizardType(type) {
+            currentType = type;
+            wizardState.currentStep = 1;
+            wizardState.answers = {};
+            sessionStorage.removeItem('foxxprompt_wizard');
+            
+            document.querySelectorAll('.wizard-type-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.textContent.toLowerCase().includes(type));
+            });
+            
+            initWizard();
+            showToast(`Switched to ${type} wizard`);
+        }
+
+        function updateProgressBar() {
+            const steps = wizardSteps[currentType];
+            const container = document.querySelector('.wizard-progress');
+            if (!container) return;
+            
+            container.innerHTML = steps.map((_, i) => `
+                <div class="wizard-progress-dot ${i + 1 < wizardState.currentStep ? 'completed' : ''} ${i + 1 === wizardState.currentStep ? 'current' : ''}" onclick="jumpToStep(${i + 1})"></div>
+            `).join('');
+        }
+
+        function jumpToStep(step) {
+            wizardState.currentStep = step;
+            saveWizardState();
+            renderWizardStep();
+            updateProgressBar();
+        }
+
+        function generateWizardPrompt() {
+    const a = wizardState.answers;
+    const typeLabels = { code: 'Code Development', image: 'Image Generation', writing: 'Writing', video: 'Video Production' };
+    
+    let prompt = `═══════════════════════════════════════════════════════\n`;
+    prompt += `TASK TYPE: ${typeLabels[currentType].toUpperCase()} | WIZARD MODE\n`;
+    prompt += `═══════════════════════════════════════════════════════\n\n`;
+    
+    if (currentType === 'code') {
+        if (a.developer_level) {
+            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            prompt += `👤 EXPERTISE LEVEL\n`;
+            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            prompt += `${a.developer_level}\n\n`;
+        }
+        
+        if (a.feature_description) {
+            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            prompt += `🎯 PRIMARY OBJECTIVE\n`;
+            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            prompt += `${a.feature_description}\n\n`;
+        }
+        
+        if (a.tech_stack && a.tech_stack.length > 0) {
+            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            prompt += `🛠️ TECHNICAL STACK\n`;
+            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            prompt += `${a.tech_stack.join(', ')}\n\n`;
+        }
+        
+        if (a.file_structure || a.existing_patterns || a.constraints) {
+            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            prompt += `📋 CODEBASE CONTEXT\n`;
+            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            if (a.file_structure) prompt += `File Structure:\n${a.file_structure}\n\n`;
+            if (a.existing_patterns) prompt += `Patterns:\n${a.existing_patterns}\n\n`;
+            if (a.constraints) prompt += `Constraints:\n${a.constraints}\n\n`;
+        }
+        
+        if (a.requirements && a.requirements.length > 0) {
+            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            prompt += `✅ KEY REQUIREMENTS\n`;
+            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            a.requirements.forEach(r => prompt += `• ${r}\n`);
+            prompt += `\n`;
+        }
+        
+        if (a.output_format) {
+            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            prompt += `📐 OUTPUT FORMAT\n`;
+            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            prompt += `${a.output_format}\n\n`;
+        }
+        
+        if (a.special_constraints) {
+            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            prompt += `⚠️ SPECIAL CONSTRAINTS\n`;
+            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            prompt += `${a.special_constraints}\n\n`;
+        }
+        
+        const guidance = {
+            'Junior Developer': 'Provide step-by-step instructions, include code comments, show examples, explain each decision.',
+            'Mid-Level': 'Focus on clean code, good practices, reasonable explanations.',
+            'Senior Developer': 'Focus on best practices, patterns, trade-offs, minimal scaffolding.',
+            'Staff Engineer': 'Focus on architecture, scalability, cross-cutting concerns, production-readiness.',
+            'Principal Engineer': 'Focus on system design, trade-offs, future-proofing, team patterns.',
+            'Architect': 'Focus on high-level design, patterns, integration points, strategic decisions.'
+        };
+        
+        if (a.developer_level && guidance[a.developer_level]) {
+            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            prompt += `📝 IMPLEMENTATION GUIDANCE\n`;
+            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            prompt += `${guidance[a.developer_level]}\n\n`;
+        }
+    }
+    
+    if (currentType === 'image') {
+        if (a.subject) {
+            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            prompt += `🎨 SUBJECT\n`;
+            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            prompt += `${a.subject}\n\n`;
+        }
+        
+        if (a.art_style) {
+            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            prompt += `🎭 ART STYLE\n`;
+            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            prompt += `${a.art_style}\n\n`;
+        }
+        
+        if (a.mood) {
+            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            prompt += `🌅 MOOD & ATMOSPHERE\n`;
+            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            prompt += `${a.mood}\n\n`;
+        }
+        
+        if (a.composition) {
+            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            prompt += `📐 COMPOSITION\n`;
+            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            prompt += `${a.composition}\n\n`;
+        }
+        
+        if (a.lighting) {
+            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            prompt += `💡 LIGHTING\n`;
+            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            prompt += `${a.lighting}\n\n`;
+        }
+        
+        prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+        prompt += `⚙️ TECHNICAL SPECS\n`;
+        prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+        prompt += `Resolution: ${a.resolution || '4K'}\n`;
+        prompt += `Aspect Ratio: ${a.aspect_ratio || '16:9'}\n`;
+        prompt += `Quality: ${a.quality || 'Detailed'}\n\n`;
+        
+        if (a.avoid) {
+            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            prompt += `⚠️ AVOID\n`;
+            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            prompt += `${a.avoid}\n\n`;
+        }
+    }
+    
+    if (currentType === 'writing') {
+        if (a.content_type) {
+            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            prompt += `📝 CONTENT TYPE\n`;
+            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            prompt += `${a.content_type}\n\n`;
+        }
+        
+        if (a.main_message) {
+            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            prompt += `🎯 MAIN MESSAGE\n`;
+            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            prompt += `${a.main_message}\n\n`;
+        }
+        
+        if (a.expertise_level || a.demographics) {
+            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            prompt += `👥 TARGET AUDIENCE\n`;
+            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            if (a.expertise_level) prompt += `Level: ${a.expertise_level}\n`;
+            if (a.demographics) prompt += `Demographics: ${a.demographics}\n`;
+            prompt += `\n`;
+        }
+        
+        if (a.tone) {
+            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            prompt += `🎭 TONE\n`;
+            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            prompt += `${a.tone}\n\n`;
+        }
+        
+        if (a.structure) {
+            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            prompt += `🏗️ STRUCTURE\n`;
+            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            prompt += `${a.structure}\n\n`;
+        }
+        
+        prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+        prompt += `📏 LENGTH\n`;
+        prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+        prompt += `Word Count: ${a.word_count || '1000-1500'}\n`;
+        prompt += `Detail: ${a.detail_level || 'Standard'}\n\n`;
+        
+        if (a.cta) {
+            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            prompt += `👉 CALL-TO-ACTION\n`;
+            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            prompt += `${a.cta}\n\n`;
+        }
+    }
+    
+    if (currentType === 'video') {
+        if (a.topic) {
+            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            prompt += `🎬 TOPIC\n`;
+            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            prompt += `${a.topic}\n\n`;
+        }
+        
+        if (a.format) {
+            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            prompt += `📽️ FORMAT\n`;
+            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            prompt += `${a.format}\n\n`;
+        }
+        
+        prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+        prompt += `⏱️ DURATION & PLATFORM\n`;
+        prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+        prompt += `Duration: ${a.duration || 'Medium (1-5min)'}\n`;
+        prompt += `Platform: ${a.platform || 'YouTube'}\n\n`;
+        
+        if (a.visual_style) {
+            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            prompt += `🎨 VISUAL STYLE\n`;
+            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            prompt += `${a.visual_style}\n\n`;
+        }
+        
+        prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+        prompt += `🔊 AUDIO\n`;
+        prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+        prompt += `Voiceover: ${a.voiceover || 'Yes'}\n`;
+        prompt += `Music: ${a.music || 'Stock'}\n`;
+        prompt += `Sound Effects: ${a.sound_effects || 'Yes'}\n\n`;
+        
+        if (a.key_moments) {
+            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            prompt += `🎯 KEY MOMENTS\n`;
+            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            prompt += `${a.key_moments}\n\n`;
+        }
+    }
+    
+    prompt += generateQualityRequirements();
+    
+    prompt += `\n═══════════════════════════════════════════════════════\n`;
+    prompt += `END OF PROMPT\n`;
+    prompt += `═══════════════════════════════════════════════════════`;
+    
+    document.getElementById('prompt-output').textContent = prompt;
+    showToast('Wizard prompt generated!');
+}
 
         const typeConfig = {
             code: {
@@ -1031,6 +1708,14 @@
         updateFormLabels();
         renderHistory();
         generatePrompt();
+
+        // Initialize mode on load
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedMode = sessionStorage.getItem('foxxprompt_mode') || 'quick';
+            if (savedMode === 'wizard') {
+                setMode('wizard');
+            }
+        });
     </script>
 </body>
 </html>
