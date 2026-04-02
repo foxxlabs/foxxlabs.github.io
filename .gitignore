@@ -1,0 +1,27 @@
+# Build outputs
+dist/
+build/
+.next/
+.nuxt/
+
+# Dependencies
+node_modules/
+.vendor/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Worktrees (isolated workspaces)
+.worktrees/
+worktrees/
+
+# Local config
+.env.local
+.env.*.local
